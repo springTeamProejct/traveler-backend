@@ -1,4 +1,4 @@
 package com.traveler.ex.springboot.domain.user;
 
-public class UserRepository {
+public interface UserRepository {
 }
