@@ -1,4 +1,4 @@
-package traveler.travel.entity;
+package traveler.travel.entity.chat;
 
 import lombok.Getter;
 
@@ -10,5 +10,5 @@ import javax.persistence.Entity;
 public class UserChatRoom {
     @EmbeddedId
     private UserChatRoomId id;
-    private boolean roomMasterYn;
+    private boolean hostYn;
 }

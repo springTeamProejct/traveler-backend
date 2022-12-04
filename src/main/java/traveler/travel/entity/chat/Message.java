@@ -1,12 +1,14 @@
-package traveler.travel.entity;
+package traveler.travel.entity.chat;
 
 import lombok.Getter;
+import traveler.travel.entity.BaseTimeEntity;
+import traveler.travel.entity.User;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-public class Message extends BaseTimeEntity{
+public class Message extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
     private Long id;

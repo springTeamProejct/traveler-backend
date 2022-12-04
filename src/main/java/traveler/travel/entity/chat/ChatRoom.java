@@ -1,11 +1,12 @@
-package traveler.travel.entity;
+package traveler.travel.entity.chat;
 
-import traveler.travel.ChatRoomType;
+import traveler.travel.enums.ChatRoomType;
+import traveler.travel.entity.BaseTimeEntity;
 
 import javax.persistence.*;
 
 @Entity
-public class ChatRoom extends BaseTimeEntity{
+public class ChatRoom extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chatroom_id")
     private Long id;

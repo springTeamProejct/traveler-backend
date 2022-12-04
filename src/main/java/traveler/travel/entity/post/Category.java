@@ -1,4 +1,4 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import lombok.Getter;
 
@@ -13,4 +13,7 @@ public class Category {
     private Long id;
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 }

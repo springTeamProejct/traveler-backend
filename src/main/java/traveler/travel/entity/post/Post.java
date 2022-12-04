@@ -1,12 +1,15 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import lombok.Getter;
+import traveler.travel.entity.BaseTimeEntity;
+import traveler.travel.entity.User;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-public class Post extends BaseTimeEntity{
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -16,6 +19,10 @@ public class Post extends BaseTimeEntity{
     @Lob
     private String content;
     private int viewCnt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

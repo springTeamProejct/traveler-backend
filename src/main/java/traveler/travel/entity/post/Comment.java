@@ -1,13 +1,14 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import traveler.travel.entity.BaseTimeEntity;
+import traveler.travel.entity.User;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-public class Comment extends BaseTimeEntity{
+public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")

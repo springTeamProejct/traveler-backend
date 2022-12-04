@@ -1,8 +1,8 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import lombok.Getter;
-import traveler.travel.Gender;
-import traveler.travel.TravelType;
+import traveler.travel.enums.Gender;
+import traveler.travel.enums.TravelType;
 
 import javax.persistence.Entity;
 import java.time.LocalDate;

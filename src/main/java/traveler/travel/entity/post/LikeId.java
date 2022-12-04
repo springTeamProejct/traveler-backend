@@ -1,13 +1,11 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Embeddable
-public class UserChatRoomId implements Serializable {
-    @Column(name = "chatroom_id")
-    private Long chatRoomId;
+public class LikeId implements Serializable {
 
     @Column(name = "post_id")
     private Long postId;

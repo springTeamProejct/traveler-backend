@@ -1,4 +1,4 @@
-package traveler.travel.entity;
+package traveler.travel.entity.post;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

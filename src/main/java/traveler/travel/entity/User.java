@@ -1,10 +1,10 @@
 package traveler.travel.entity;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import traveler.travel.AccountType;
-import traveler.travel.Authority;
-import traveler.travel.Gender;
+import traveler.travel.enums.AccountType;
+import traveler.travel.enums.Authority;
+import traveler.travel.enums.Gender;
+import traveler.travel.entity.post.File;
 
 import javax.persistence.*;
 
