@@ -31,4 +31,8 @@ public class User extends BaseTimeEntity {
     private AccountType accountType; // 이메일, 카카오, 네이버, 구글
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    public void setAuthority(Authority authority){
+        this.authority = authority;
+    }
 }
