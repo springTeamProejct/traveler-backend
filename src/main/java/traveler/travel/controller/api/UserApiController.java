@@ -15,7 +15,8 @@ public class UserApiController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/api/user")
+    //유저 회원가입
+    @PostMapping("/users")
     public ResponseDto<Integer> save(@RequestBody User user){
         System.out.println("save함수 호출");
         user.setAuthority(Authority.ROLE_USER);
