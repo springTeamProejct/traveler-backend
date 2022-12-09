@@ -20,7 +20,6 @@ public class UserApiController {
         System.out.println("save함수 호출");
         user.setAuthority(Authority.ROLE_USER);
         userService.회원가입(user);
-        System.out.println("...");
         return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
     }
 }
