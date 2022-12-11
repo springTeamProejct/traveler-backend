@@ -35,4 +35,9 @@ public class User extends BaseTimeEntity {
     public void setAuthority(Authority authority){
         this.authority = authority;
     }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
+
 }
