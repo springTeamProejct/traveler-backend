@@ -1,6 +1,6 @@
 package traveler.travel.controller.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,9 +13,9 @@ import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 public class UserApiController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     //유저 회원가입
     @PostMapping("/users")
