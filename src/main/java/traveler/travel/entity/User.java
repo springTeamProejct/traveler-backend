@@ -1,6 +1,9 @@
 package traveler.travel.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import traveler.travel.enums.AccountType;
 import traveler.travel.enums.Authority;
 import traveler.travel.enums.Gender;
@@ -10,6 +13,9 @@ import javax.persistence.*;
 
 @Entity
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,4 +37,13 @@ public class User extends BaseTimeEntity {
     private AccountType accountType; // 이메일, 카카오, 네이버, 구글
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    public void setAuthority(Authority authority){
+        this.authority = authority;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
+
 }
