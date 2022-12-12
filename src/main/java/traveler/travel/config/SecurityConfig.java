@@ -31,7 +31,6 @@ public class SecurityConfig {
                 .and()
                 .formLogin()
                 .loginPage("/users/login");
-        //스프링 시큐리티가 해당 주소로 요청오는 로그인을 가로채서 대신 로그인을 해준다.
         return http.build();
     }
 }
