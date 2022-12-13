@@ -76,7 +76,7 @@ public class UserApiController {
         String value = authDto.getType().equals(EmailAndPhoneAuthDto.Type.EMAIL)? redisUtil.getValue(authDto.getEmail()) : redisUtil.getValue(authDto.getPhoneNum());
         if (value == null || !value.equals(authDto.getCode())) {
             // 유효하지 않은 인증번호
-            return new ResponseDto<String>(HttpStatus.OK.value(), "invalid code");
+            return new ResponseDto<String>(HttpStatus.BAD_REQUEST.value(), "invalid code");
         } else {
             // 인증 성공
             return new ResponseDto<String>(HttpStatus.OK.value(), "success");
