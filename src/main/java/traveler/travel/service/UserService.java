@@ -13,6 +13,7 @@ import traveler.travel.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -24,7 +25,6 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
-
     //일반 회원 가입
     @Transactional
     public void join(UserDto userDto) {
@@ -33,6 +33,7 @@ public class UserService {
                 .password(encoder.encode(userDto.getPassword()))
                 .authority(Authority.ROLE_USER)
                 .build();
+        userRepository.save(user);
     }
 
     //소셜 로그인 호출 함수
@@ -54,7 +55,6 @@ public class UserService {
         return validatorResult;
     }
 
-//    @Transactional
     public boolean checkEmailDuplicate(String email) {
         return userRepository.existsByEmail(email);
     }
