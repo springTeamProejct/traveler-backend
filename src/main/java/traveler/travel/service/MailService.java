@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import traveler.travel.util.RedisUtil;
 
@@ -14,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 @Service
+@EnableAsync
 @RequiredArgsConstructor
 public class MailService {
     private final JavaMailSender mailSender;
@@ -45,6 +48,7 @@ public class MailService {
     }
 
     // 인증 메일 발송
+    @Async
     public String sendAuthMail(String to) throws Exception {
         String code = generateAuthCode();
         MimeMessage message = generateAuthMessage(to, code);
