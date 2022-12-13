@@ -17,6 +17,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -40,7 +41,6 @@ public class UserService {
     }
 
     //controller에서 발생한 에러를 전달 받아 다시 반환해주는 함수(반환된 값은 js에서 사용된다.)
-    @Transactional(readOnly = true)
     public Map<String, String> validateHandling(BindingResult bindingResult){
         Map<String, String> validatorResult = new HashMap<>();
 

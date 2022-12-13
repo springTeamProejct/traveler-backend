@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration    //빈 등록(IoC관리)
 @EnableWebSecurity    //시큐리티 필터가 등록이 된다.
 @EnableGlobalMethodSecurity(prePostEnabled = true)	//특정 주소로 접근하면 권한 인증을 미리 체크
 public class SecurityConfig {
@@ -24,7 +23,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers("/users")
+                .antMatchers("/users/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
