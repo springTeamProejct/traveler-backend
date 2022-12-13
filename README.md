@@ -21,3 +21,41 @@
 ## issue-number
 
 연관된 이슈 첨부, 여러 개 추가 기능
+
+
+
+# 개발환경 서버 구동법
+
+## 사전 준비사항
+1. docker desktop 설치
+
+## mysql 구동
+```bash
+docker run -d -p 3306:3306 --name mysql-test \
+-e MYSQL_ROOT_PASSWORD=root \
+-e MYSQL_USER=cos \
+-e MYSQL_PASSWORD=19970604 \
+-e MYSQL_DATABASE=travel \
+-v /Users/jopopscript/mysql-test-dir:/var/lib/mysql \
+mysql:8.0.30
+```
+https://hub.docker.com/_/mysql
+
+## 초기에 mysql 테이블 생성되도록 설정 변경
+traveler-backend/src/main/resources/application.yml
+```yml
+  jpa:
+    open-in-view: true
+    hibernate:
+      # update에서 create로 수정
+      ddl-auto: create
+```
+
+## redis 구동
+```bash
+docker run -d -p 6379:6379 --name redis-test \
+redis:7.0.5
+```
+
+## intellij를 사용한 spring 실행
+control + r
