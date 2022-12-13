@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.controller.dto.ResponseDto;
@@ -11,6 +12,7 @@ import traveler.travel.dto.EmailAndPhoneAuthDto;
 import traveler.travel.dto.UserDto;
 import traveler.travel.service.MailService;
 import traveler.travel.service.UserService;
+import traveler.travel.util.RedisUtil;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.Map;
 public class UserApiController {
     private final UserService userService;
     private final MailService mailService;
+    private final RedisUtil redisUtil;
 
     //유저 회원가입
     @PostMapping()
@@ -66,4 +69,18 @@ public class UserApiController {
         }
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    // 인증
+    @PostMapping("/signup/authcode/validate")
+    public ResponseDto<String> validateAuthCode(@RequestBody EmailAndPhoneAuthDto authDto) {
+        String value = authDto.getType().equals(EmailAndPhoneAuthDto.Type.EMAIL)? redisUtil.getValue(authDto.getEmail()) : redisUtil.getValue(authDto.getPhoneNum());
+        if (value == null || !value.equals(authDto.getCode())) {
+            // 유효하지 않은 인증번호
+            return new ResponseDto<String>(HttpStatus.OK.value(), "invalid code");
+        } else {
+            // 인증 성공
+            return new ResponseDto<String>(HttpStatus.OK.value(), "success");
+        }
+    }
 }
+
