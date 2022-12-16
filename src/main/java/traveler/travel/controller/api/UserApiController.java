@@ -4,14 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.controller.dto.ResponseDto;
+import traveler.travel.dto.EmailAndPhoneAuthDto;
+import traveler.travel.dto.UserDto;
 import traveler.travel.entity.User;
 import traveler.travel.exception.EmailDuplicateException;
 import traveler.travel.exception.ErrorCode;
 import traveler.travel.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
-import traveler.travel.dto.EmailAndPhoneAuthDto;
 import traveler.travel.service.MailService;
 import traveler.travel.service.UserService;
 import traveler.travel.util.RedisUtil;
@@ -23,24 +24,26 @@ import java.util.Optional;
 @RequestMapping("/users")
 @Slf4j
 public class UserApiController {
-
     private final UserService userService;
     private final MailService mailService;
     private final RedisUtil redisUtil;
+
     private final UserRepository userRepository;
+
     private final PasswordEncoder encoder;
+
 
     //유저 회원가입
     @PostMapping()
-    public ResponseDto<?> save(@RequestBody User user){
+    public ResponseDto<?> save (@RequestBody UserDto user){
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
         user.setPassword(encoder.encode(user.getPassword()));
-        userRepository.save(user);
-        return new ResponseDto<Integer>(HttpStatus.OK.value(), "success");
+        userService.join(user);
+        return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
     }
 
     public Optional<User> findUserByEmail(String email){

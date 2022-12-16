@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import traveler.travel.dto.UserDto;
 import traveler.travel.enums.AccountType;
 import traveler.travel.enums.Authority;
 import traveler.travel.enums.Gender;
@@ -46,4 +48,12 @@ public class User extends BaseTimeEntity {
         this.password = password;
     }
 
+    public static User build(UserDto userDto){
+        User user = User.builder()
+                .email(userDto.getEmail())
+                .password(userDto.getPassword())
+                .authority(Authority.ROLE_USER)
+                .build();
+        return user;
+    }
 }
