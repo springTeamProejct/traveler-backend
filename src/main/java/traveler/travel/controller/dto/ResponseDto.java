@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ResponseDto<T> {
     int status;
-    String data;
+    T data;
 }
