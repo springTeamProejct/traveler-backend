@@ -53,6 +53,10 @@ public class User extends BaseTimeEntity {
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())
                 .authority(Authority.ROLE_USER)
+                .phoneNum(userDto.getPhoneNum())
+                .birth(userDto.getBirth())
+                .nickname(userDto.getNickname())
+//                .gender(Gender)
                 .build();
         return user;
     }
