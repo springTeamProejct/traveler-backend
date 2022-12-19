@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,13 +51,13 @@ public class LoginTest {
 
     private static String LOGIN_URL = "/login";
 
-    private void clear(){
+    private void clear() {
         em.flush();
         em.clear();
     }
 
     @BeforeEach
-    private void init(){
+    private void init() {
         userRepository.save(User.builder()
                 .email(USERNAME)
                 .password(encoder.encode(PASSWORD))
@@ -66,7 +67,7 @@ public class LoginTest {
         clear();
     }
 
-    private Map getUsernamePasswordMap(String email, String password){
+    private Map getUsernamePasswordMap(String email, String password) {
         Map<String, String> map = new HashMap<>();
         map.put(KEY_USERNAME, email);
         map.put(KEY_PASSWORD, password);
@@ -81,10 +82,49 @@ public class LoginTest {
     }
 
     @Test
-    public void 로그인_성공() throws Exception{
+    public void 로그인_성공() throws Exception {
         Map<String, String> map = getUsernamePasswordMap(USERNAME, PASSWORD);
 
         MvcResult result = perform(LOGIN_URL, APPLICATION_JSON, map)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void 로그인_실패_아이디틀림() throws Exception {
+        Map<String, String> map = getUsernamePasswordMap(USERNAME + "123", PASSWORD);
+
+        MvcResult result = perform(LOGIN_URL, APPLICATION_JSON, map)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void 로그인_실패_비밀번호틀림() throws Exception {
+        Map<String, String> map = getUsernamePasswordMap(USERNAME, PASSWORD + "123");
+
+        MvcResult result = perform(LOGIN_URL, APPLICATION_JSON, map)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void 로그인_주소가_틀리면_FORBIDDEN() throws Exception {
+        Map<String, String> map = getUsernamePasswordMap(USERNAME, PASSWORD);
+
+        perform(LOGIN_URL + "123", APPLICATION_JSON, map)
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void 로그인_데이터형식_JSON이_아니면_200() throws Exception {
+        Map<String, String> map = getUsernamePasswordMap(USERNAME, PASSWORD);
+
+        perform(LOGIN_URL , APPLICATION_FORM_URLENCODED, map)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
