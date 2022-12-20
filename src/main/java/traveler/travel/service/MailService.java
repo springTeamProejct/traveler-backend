@@ -20,7 +20,6 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class MailService {
     private final JavaMailSender mailSender;
-    private final UserService userService;
     private final RedisUtil redisUtil;
 
     @Value("${spring.mail.username}")
@@ -72,5 +71,10 @@ public class MailService {
             code.append((rnd.nextInt(10)));
         }
         return code.toString();
+    }
+
+    // Redis 에 인증번호 저장
+    public void saveAuthCode(String key, String value) {
+        redisUtil.setValueWithExpireTime(key, value);
     }
 }
