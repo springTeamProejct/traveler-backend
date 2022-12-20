@@ -56,4 +56,8 @@ public class UserService {
     public boolean checkEmailDuplicate(String email) {
         return userRepository.existsByEmail(email);
     }
+
+    public boolean checkPhoneNumDuplicate(String phoneNum) {
+        return userRepository.existsByPhoneNum(phoneNum);
+    }
 }
