@@ -68,7 +68,7 @@ public class User extends BaseTimeEntity{
                 .phoneNum(userDto.getPhoneNum())
                 .birth(userDto.getBirth())
                 .nickname(userDto.getNickname())
-//                .gender(Gender)
+                .gender(Gender.valueOf(userDto.getGender()))
                 .build();
         return user;
     }
