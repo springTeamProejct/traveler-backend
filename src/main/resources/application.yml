@@ -56,7 +56,15 @@ spring:
 cos:
   key: cos1234
 
-  
+ncp-sms:
+  accessKey: 6XgrJJvXNrM5moQrzuqR
+  secretKey: GoC9gVDZ6brASLWxbR941WqX3RrZFy5X3G2gH2RN
+  serviceId: ncp:sms:kr:297964575311:traveler
+  senderPhoneNum: "01033454223"
+
+
+# naver cloud sms
+
 #jwt:
 #  secret: c3ByaW5nLWJvb3Qtc2VjdXJpdHktand0LXR1dG9yaWFsLWppd29vbi1zcHJpbmctYm9vdC1zZWN1cml0eS1qd3QtdHV0b3JpYWwK
 #  token-validity-in-seconds: 86400
