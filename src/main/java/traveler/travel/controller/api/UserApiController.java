@@ -3,20 +3,22 @@ package traveler.travel.controller.api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.controller.dto.ResponseDto;
 import traveler.travel.dto.EmailAndPhoneAuthDto;
 import traveler.travel.dto.UserDto;
+import traveler.travel.entity.User;
+import traveler.travel.exception.EmailDuplicateException;
+import traveler.travel.exception.ErrorCode;
+import traveler.travel.repository.UserRepository;
 import traveler.travel.service.MailService;
 import traveler.travel.service.SmsService;
 import traveler.travel.service.UserService;
 import traveler.travel.util.RedisUtil;
 
-import javax.validation.Valid;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,24 +30,27 @@ public class UserApiController {
     private final RedisUtil redisUtil;
     private final SmsService smsService;
 
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder encoder;
+
+
     //유저 회원가입
     @PostMapping()
-    public ResponseDto<?> save(@Valid @RequestBody UserDto userDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> validatorResult = userService.validateHandling(bindingResult);
-
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), validatorResult);
+    public ResponseDto<?> save (@RequestBody UserDto user){
+        Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
+        if(alreadyUser.isPresent()){
+            throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        System.out.println("save함수 호출");
-        userService.join(userDto);
+        user.setPassword(encoder.encode(user.getPassword()));
+        userService.join(user);
         return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
     }
 
-    //이메일 중복 확인(중복되면 true, 중복되지 않으면 false)
-    @GetMapping("/signup/email")
-    public ResponseEntity<Boolean> checkEmailDuplicate(@PathVariable String email) {
-        return ResponseEntity.ok(userService.checkEmailDuplicate(email));
+    public Optional<User> findUserByEmail(String email){
+        Optional<User> alreadyUser = userRepository.findByEmail(email);
+        return alreadyUser;
     }
 
 

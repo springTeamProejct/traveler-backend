@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import traveler.travel.dto.UserDto;
 import traveler.travel.enums.AccountType;
 import traveler.travel.enums.Authority;
 import traveler.travel.enums.Gender;
@@ -16,7 +19,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseTimeEntity {
+public class User extends BaseTimeEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -46,4 +49,16 @@ public class User extends BaseTimeEntity {
         this.password = password;
     }
 
+    public static User build(UserDto userDto){
+        User user = User.builder()
+                .email(userDto.getEmail())
+                .password(userDto.getPassword())
+                .authority(Authority.ROLE_USER)
+                .phoneNum(userDto.getPhoneNum())
+                .birth(userDto.getBirth())
+                .nickname(userDto.getNickname())
+//                .gender(Gender)
+                .build();
+        return user;
+    }
 }
