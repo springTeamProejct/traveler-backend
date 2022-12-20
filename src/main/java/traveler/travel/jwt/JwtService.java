@@ -4,6 +4,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 public interface JwtService {
 
@@ -14,15 +15,20 @@ public interface JwtService {
 
     void destroyRefreshToken(String email);
 
-    void sendToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException;
+    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
+    void sendAccessToken(HttpServletResponse response, String accessToken);
 
-    String extractAccessToken(HttpServletRequest request)throws IOException, ServletException;
+//    void sendToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException;
 
-    String extractRefreshToken(HttpServletRequest request)throws IOException, ServletException;
+    Optional<String> extractAccessToken(HttpServletRequest request);
 
-    String extractUsername(String accessToken);
+    Optional<String> extractRefreshToken(HttpServletRequest request);
+
+    Optional<String> extractUsername(String accessToken);
 
     void setAccessTokenHeader(HttpServletResponse response, String accessToken);
-
     void setRefreshTokenHeader(HttpServletResponse response, String refreshToken);
+
+    boolean isTokenValid(String token);
+    //토큰의 유효성 검사를 할때 사용
 }
