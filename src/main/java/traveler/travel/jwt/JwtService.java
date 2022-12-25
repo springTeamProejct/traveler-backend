@@ -1,9 +1,7 @@
 package traveler.travel.jwt;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Optional;
 
 public interface JwtService {
@@ -17,8 +15,6 @@ public interface JwtService {
 
     void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
     void sendAccessToken(HttpServletResponse response, String accessToken);
-
-//    void sendToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException;
 
     Optional<String> extractAccessToken(HttpServletRequest request);
 

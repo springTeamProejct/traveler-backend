@@ -2,6 +2,7 @@ package traveler.travel.global.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -13,11 +14,22 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+<<<<<<< Updated upstream:src/main/java/traveler/travel/global/config/SecurityConfig.java
 import traveler.travel.global.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import traveler.travel.global.login.handler.LoginFailureHandler;
 import traveler.travel.global.login.handler.LoginSuccessJWTProviderHandler;
 import traveler.travel.domain.account.service.LoginService;
+=======
+import traveler.travel.jwt.JwtAuthenticationProcessingFilter;
+import traveler.travel.jwt.JwtService;
+import traveler.travel.login.filter.JsonUsernamePasswordAuthenticationFilter;
+import traveler.travel.login.handler.LoginFailureHandler;
+import traveler.travel.login.handler.LoginSuccessJWTProviderHandler;
+import traveler.travel.repository.UserRepository;
+import traveler.travel.service.LoginService;
+>>>>>>> Stashed changes:src/main/java/traveler/travel/config/SecurityConfig.java
 
+@RequiredArgsConstructor
 @EnableWebSecurity    //시큐리티 필터가 등록이 된다.
 @EnableGlobalMethodSecurity(prePostEnabled = true)	//특정 주소로 접근하면 권한 인증을 미리 체크
 public class SecurityConfig {
@@ -25,10 +37,9 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final LoginService loginService;
 
-    public SecurityConfig(ObjectMapper objectMapper, LoginService loginService) {
-        this.objectMapper = objectMapper;
-        this.loginService = loginService;
-    }
+    private final UserRepository userRepository;
+
+    private final JwtService jwtService;
 
     @Bean
     public BCryptPasswordEncoder encodePWD() {
@@ -64,7 +75,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessJWTProviderHandler loginSuccessJWTProviderHandler(){
-        return new LoginSuccessJWTProviderHandler();
+        return new LoginSuccessJWTProviderHandler(jwtService, userRepository);
     }
 
     @Bean
@@ -76,7 +87,15 @@ public class SecurityConfig {
     public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter(){
         JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter = new JsonUsernamePasswordAuthenticationFilter(objectMapper);
         jsonUsernamePasswordLoginFilter.setAuthenticationManager(authenticationManger());
+        jsonUsernamePasswordLoginFilter.setAuthenticationSuccessHandler(loginSuccessJWTProviderHandler());
         jsonUsernamePasswordLoginFilter.setAuthenticationFailureHandler(loginFailureHandler());
+        return jsonUsernamePasswordLoginFilter;
+    }
+
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
+        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+
         return jsonUsernamePasswordLoginFilter;
     }
 }
