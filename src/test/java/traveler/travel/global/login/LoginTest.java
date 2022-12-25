@@ -14,9 +14,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import traveler.travel.entity.User;
-import traveler.travel.enums.Authority;
-import traveler.travel.repository.UserRepository;
+import traveler.travel.domain.account.entity.User;
+import traveler.travel.domain.account.enums.Authority;
+import traveler.travel.domain.account.repository.UserRepository;
 
 import javax.persistence.EntityManager;
 import java.util.HashMap;
