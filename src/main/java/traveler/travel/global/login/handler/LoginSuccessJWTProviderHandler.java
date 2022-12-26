@@ -33,6 +33,7 @@ public class LoginSuccessJWTProviderHandler extends SimpleUrlAuthenticationSucce
                 user -> user.updateRefreshToken(refreshToken)
         );
 
+        response.getWriter().write("success");
         log.info("로그인에 성공합니다.email:{}", email);
         log.info("AccessToken을 발급합니다. AccessToken:{}", accessToken);
         log.info("RefreshToken에 성공합니다.RefreshToken:{}", refreshToken);
