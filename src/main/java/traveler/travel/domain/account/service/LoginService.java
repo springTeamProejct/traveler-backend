@@ -20,7 +20,7 @@ public class LoginService implements UserDetailsService {
         User user = userRepository.findByEmail(email).orElseThrow(()
                 -> new UsernameNotFoundException("이메일이 없습니다."));
 
-        return (UserDetails) User.builder().email(user.getEmail())
+        return User.builder().email(user.getEmail())
                 .password(user.getPassword())
                 .authority(Authority.ROLE_USER)
                 .build();

@@ -19,7 +19,7 @@ import java.util.Map;
 public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/users/login";
-    // /login/oauth2/ + ???? 로 오는 요청을 처리할 것이다.
+    // /users/login/ + ???? 로 오는 요청을 처리할 것이다.
 
     private static final String HTTP_METHOD = "POST";
     //HTTP 메서드의 방식은 POST이다.
@@ -29,7 +29,7 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
 
     private final ObjectMapper objectMapper;
 
-    private static final String USEREMAIL_KEY = "userEmail";
+    private static final String USERNAME_KEY = "email";
     private static final String PASSWORD_KEY ="password";
 
     private static final AntPathRequestMatcher DEFAULT_LOGIN_PATH_REQUEST_MATCHER =
@@ -51,10 +51,10 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
 
         Map<String, String> userEmailPasswordMap = objectMapper.readValue(messageBody, Map.class);
 
-        String userEmail = userEmailPasswordMap.get(USEREMAIL_KEY);
+        String username = userEmailPasswordMap.get(USERNAME_KEY);
         String password = userEmailPasswordMap.get(PASSWORD_KEY);
 
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(userEmail, password);
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
 
         return this.getAuthenticationManager().authenticate(authRequest);
     }

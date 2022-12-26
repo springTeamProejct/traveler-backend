@@ -36,6 +36,7 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
+    // /users
     public ResponseDto<?> save (@RequestBody UserDto user){
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
