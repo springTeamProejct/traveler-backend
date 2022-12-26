@@ -14,20 +14,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-<<<<<<< Updated upstream:src/main/java/traveler/travel/global/config/SecurityConfig.java
+import traveler.travel.domain.account.repository.UserRepository;
+import traveler.travel.domain.account.service.LoginService;
 import traveler.travel.global.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import traveler.travel.global.login.handler.LoginFailureHandler;
 import traveler.travel.global.login.handler.LoginSuccessJWTProviderHandler;
-import traveler.travel.domain.account.service.LoginService;
-=======
 import traveler.travel.jwt.JwtAuthenticationProcessingFilter;
 import traveler.travel.jwt.JwtService;
-import traveler.travel.login.filter.JsonUsernamePasswordAuthenticationFilter;
-import traveler.travel.login.handler.LoginFailureHandler;
-import traveler.travel.login.handler.LoginSuccessJWTProviderHandler;
-import traveler.travel.repository.UserRepository;
-import traveler.travel.service.LoginService;
->>>>>>> Stashed changes:src/main/java/traveler/travel/config/SecurityConfig.java
 
 @RequiredArgsConstructor
 @EnableWebSecurity    //시큐리티 필터가 등록이 된다.

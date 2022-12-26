@@ -11,10 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.transaction.annotation.Transactional;
-import traveler.travel.entity.User;
-import traveler.travel.enums.Authority;
+import traveler.travel.domain.account.entity.User;
+import traveler.travel.domain.account.enums.Authority;
+import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.jwt.JwtService;
-import traveler.travel.repository.UserRepository;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;

@@ -9,9 +9,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
-import traveler.travel.entity.User;
-import traveler.travel.enums.Authority;
-import traveler.travel.repository.UserRepository;
+import traveler.travel.domain.account.entity.User;
+import traveler.travel.domain.account.enums.Authority;
+import traveler.travel.domain.account.repository.UserRepository;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -58,6 +58,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                         )
                 )
         );
+        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user){
