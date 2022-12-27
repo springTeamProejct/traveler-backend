@@ -1,9 +1,8 @@
 package traveler.travel.domain.account.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.enums.AccountType;
@@ -12,13 +11,15 @@ import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.entity.File;
 
 import javax.persistence.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User extends BaseTimeEntity {
+public class User extends BaseTimeEntity implements UserDetails {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -40,6 +41,17 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Column(length = 1000)
+    private String refreshToken;
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+
+    public void destroyRefreshToken(){
+        this.refreshToken = null;
+    }
+
     public void setAuthority(Authority authority){
         this.authority = authority;
     }
@@ -56,8 +68,43 @@ public class User extends BaseTimeEntity {
                 .phoneNum(userDto.getPhoneNum())
                 .birth(userDto.getBirth())
                 .nickname(userDto.getNickname())
-//                .gender(Gender)
+                .gender(Gender.valueOf(userDto.getGender()))
                 .build();
         return user;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Collection < GrantedAuthority > collectors = new ArrayDeque<>();
+        collectors.add(() -> {
+            return "계정별 등록할 권한";
+        });
+
+        return collectors;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

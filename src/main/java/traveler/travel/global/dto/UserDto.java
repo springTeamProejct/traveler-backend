@@ -24,7 +24,7 @@ public class UserDto {
     private String birth;
     private String nickname;
 
-//    private Gender gender;
+    private String gender;
 
 
 }

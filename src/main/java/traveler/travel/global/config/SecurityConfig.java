@@ -2,6 +2,7 @@ package traveler.travel.global.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -13,11 +14,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import traveler.travel.domain.account.repository.UserRepository;
+import traveler.travel.domain.account.service.LoginService;
 import traveler.travel.global.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import traveler.travel.global.login.handler.LoginFailureHandler;
 import traveler.travel.global.login.handler.LoginSuccessJWTProviderHandler;
-import traveler.travel.domain.account.service.LoginService;
+import traveler.travel.jwt.JwtAuthenticationProcessingFilter;
+import traveler.travel.jwt.JwtService;
 
+@RequiredArgsConstructor
 @EnableWebSecurity    //시큐리티 필터가 등록이 된다.
 @EnableGlobalMethodSecurity(prePostEnabled = true)	//특정 주소로 접근하면 권한 인증을 미리 체크
 public class SecurityConfig {
@@ -25,10 +30,9 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final LoginService loginService;
 
-    public SecurityConfig(ObjectMapper objectMapper, LoginService loginService) {
-        this.objectMapper = objectMapper;
-        this.loginService = loginService;
-    }
+    private final UserRepository userRepository;
+
+    private final JwtService jwtService;
 
     @Bean
     public BCryptPasswordEncoder encodePWD() {
@@ -52,7 +56,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers("/users/**")
+                .antMatchers("/users/**", "/")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
@@ -64,7 +68,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessJWTProviderHandler loginSuccessJWTProviderHandler(){
-        return new LoginSuccessJWTProviderHandler();
+        return new LoginSuccessJWTProviderHandler(jwtService, userRepository);
     }
 
     @Bean
@@ -76,7 +80,15 @@ public class SecurityConfig {
     public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter(){
         JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter = new JsonUsernamePasswordAuthenticationFilter(objectMapper);
         jsonUsernamePasswordLoginFilter.setAuthenticationManager(authenticationManger());
+        jsonUsernamePasswordLoginFilter.setAuthenticationSuccessHandler(loginSuccessJWTProviderHandler());
         jsonUsernamePasswordLoginFilter.setAuthenticationFailureHandler(loginFailureHandler());
+        return jsonUsernamePasswordLoginFilter;
+    }
+
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
+        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+
         return jsonUsernamePasswordLoginFilter;
     }
 }
