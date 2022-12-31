@@ -3,11 +3,10 @@ package traveler.travel.domain.account.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import traveler.travel.global.dto.ResponseDto;
-import traveler.travel.global.dto.EmailAndPhoneAuthDto;
-import traveler.travel.global.dto.UserDto;
+import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
 import traveler.travel.global.exception.ErrorCode;
@@ -53,6 +52,15 @@ public class UserApiController {
         return alreadyUser;
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<TokenDto> login(@RequestBody EmailLoginRequestDto dto) {
+        return ResponseEntity.ok(userService.login(dto));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
+        return ResponseEntity.ok(userService.reissue(tokenRequestDto));
+    }
 
     // 이메일, 전화번호 인증 발송
     @PostMapping("/signup/authcode")
