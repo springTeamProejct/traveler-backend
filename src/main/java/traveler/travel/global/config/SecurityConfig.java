@@ -1,38 +1,30 @@
 package traveler.travel.global.config;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import traveler.travel.domain.account.repository.UserRepository;
-import traveler.travel.domain.account.service.LoginService;
-import traveler.travel.global.login.filter.JsonUsernamePasswordAuthenticationFilter;
-import traveler.travel.global.login.handler.LoginFailureHandler;
-import traveler.travel.global.login.handler.LoginSuccessJWTProviderHandler;
-import traveler.travel.jwt.JwtAuthenticationProcessingFilter;
-import traveler.travel.jwt.JwtService;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import traveler.travel.jwt.JwtAccessDeniedHandler;
+import traveler.travel.jwt.JwtAuthenticationEntryPoint;
+import traveler.travel.jwt.TokenProvider;
 
 @RequiredArgsConstructor
-@EnableWebSecurity    //시큐리티 필터가 등록이 된다.
-@EnableGlobalMethodSecurity(prePostEnabled = true)	//특정 주소로 접근하면 권한 인증을 미리 체크
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final ObjectMapper objectMapper;
-    private final LoginService loginService;
-
-    private final UserRepository userRepository;
-
-    private final JwtService jwtService;
+    private final TokenProvider tokenProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public BCryptPasswordEncoder encodePWD() {
@@ -40,55 +32,54 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManger(){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(encodePWD());
-        provider.setUserDetailsService(loginService);
-        return new ProviderManager(provider);
-    }
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .formLogin().disable()
-                .httpBasic().disable()
-                //httpBasic 인증방법 비활성화(특정 리소스에 접근할 때 username과 password 물어봄)
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeHttpRequests()
-                .antMatchers("/users/**", "/")
-                .permitAll()
-                .anyRequest()
-                .authenticated();
+        // CSRF 설정 Disable
+        http.csrf().disable()
 
-        http.addFilterAfter(jsonUsernamePasswordLoginFilter(), LogoutFilter.class);
+                // exception handling 할 때 우리가 만든 클래스를 추가
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
+
+                .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
+
+                // 시큐리티는 기본적으로 세션을 사용
+                // 여기서는 세션을 사용하지 않기 때문에 세션 설정을 Stateless 로 설정
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                // 로그인, 회원가입 API 는 토큰이 없는 상태에서 요청이 들어오기 때문에 permitAll 설정
+                .and()
+                .authorizeRequests()
+                .antMatchers("/users/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/posts/**").permitAll() // 게시글 조회는 로그인 안해도 가능
+                .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
+
+                // JwtFilter 를 addFilterBefore 로 등록했던 JwtSecurityConfig 클래스를 적용
+                .and()
+                .apply(new JwtSecurityConfig(tokenProvider));
 
         return http.build();
     }
 
+    // CORS 허용 설정
     @Bean
-    public LoginSuccessJWTProviderHandler loginSuccessJWTProviderHandler(){
-        return new LoginSuccessJWTProviderHandler(jwtService, userRepository);
-    }
+    public CorsConfigurationSource corsConfigurationSource() {
 
-    @Bean
-    public LoginFailureHandler loginFailureHandler(){
-        return new LoginFailureHandler();
-    }
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-    @Bean
-    public JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter(){
-        JsonUsernamePasswordAuthenticationFilter jsonUsernamePasswordLoginFilter = new JsonUsernamePasswordAuthenticationFilter(objectMapper);
-        jsonUsernamePasswordLoginFilter.setAuthenticationManager(authenticationManger());
-        jsonUsernamePasswordLoginFilter.setAuthenticationSuccessHandler(loginSuccessJWTProviderHandler());
-        jsonUsernamePasswordLoginFilter.setAuthenticationFailureHandler(loginFailureHandler());
-        return jsonUsernamePasswordLoginFilter;
-    }
+        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.setAllowCredentials(true);
 
-    @Bean
-    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
-        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
 
-        return jsonUsernamePasswordLoginFilter;
+        return source;
     }
 }
