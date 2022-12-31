@@ -1,22 +1,47 @@
 package traveler.travel.domain.post.entity;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.enums.TravelType;
 
-import javax.persistence.Entity;
-import java.time.LocalDate;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-public class Travel extends Post {
+@NoArgsConstructor
+public class Travel{
 
-    private String location;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "travel_id")
+    private Long id;
     private boolean gatherYn;
-    private LocalDate dateTime;
+    private int maxCnt; // 모집 인원
+    private int nowCnt; // 현재 참여 인원
     private TravelType travelType; // 즉시참여, 대화후참여
     private Gender gender;
     private int minAge;
     private int maxAge;
+    private double xPos;
+    private double yPos;
+    private String location;
+    private LocalDateTime dateTime;
 
+    @Builder
+    public Travel(int maxCnt, TravelType travelType, Gender gender, int maxAge, int minAge
+            , double xPos, double yPos, String location, LocalDateTime dateTime) {
+        this.maxCnt = maxCnt;
+        this.travelType = travelType;
+        this.gender = gender;
+        this.minAge = minAge;
+        this.maxAge = maxAge;
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.location = location;
+        this.dateTime = dateTime;
+        nowCnt = 1;
+        gatherYn = true;
+    }
 }
