@@ -1,7 +1,5 @@
 package traveler.travel.global.jwt.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Authority;
 import traveler.travel.domain.account.repository.UserRepository;
-import traveler.travel.jwt.JwtService;
 
 import javax.persistence.EntityManager;
 import java.util.HashMap;

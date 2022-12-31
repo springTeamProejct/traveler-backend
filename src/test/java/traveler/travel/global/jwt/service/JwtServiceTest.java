@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Authority;
 import traveler.travel.domain.account.repository.UserRepository;
-import traveler.travel.jwt.JwtService;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
