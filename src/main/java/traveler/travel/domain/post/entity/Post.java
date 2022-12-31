@@ -1,8 +1,10 @@
 package traveler.travel.domain.post.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.domain.account.entity.User;
+import traveler.travel.domain.post.enums.Category;
 
 import javax.persistence.*;
 
@@ -24,8 +26,30 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User writer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @Enumerated(EnumType.STRING)
     private Category category;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private Travel travel;
+
+    public void setTravel(Travel travel) {
+        this.travel = travel;
+    }
+
+    @Builder
+    public Post(String title, String content, User writer, Category category, Travel travel) {
+        this.title = title;
+        this.content = content;
+        this.writer = writer;
+        this.category = category;
+        this.travel = travel;
+
+        viewCnt = 0;
+    }
+
+    protected Post() {}
+
+    public void view() {
+        viewCnt += 1;
+    }
 }
