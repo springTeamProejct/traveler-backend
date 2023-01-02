@@ -10,6 +10,7 @@ import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
 
 @Service
@@ -43,13 +44,15 @@ public class PostService {
 
     // 게시글 찾기
     public Post findOne(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P01"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P00"));
+        if (post.getDeletedAt() != null) throw new NotFoundException("P01");
         return post;
     }
 
     // 게시글 열람
     @Transactional
-    public Post view(Post post) {
+    public Post view(Long postId) {
+        Post post = findOne(postId);
         post.view();
         return post;
     }
@@ -57,4 +60,17 @@ public class PostService {
     // 게시글 수정
 
     // 게시글 삭제
+    @Transactional
+    public Post delete(Long postId, User writer) {
+        Post post = findOne(postId);
+
+        // 작성자만 수정,삭제할 수 있음
+        if (!post.getWriter().equals(writer)) {
+            throw new ForbiddenException("P02");
+        }
+
+        post.delete(); // 삭제 처리
+        return post;
+    }
+
 }
