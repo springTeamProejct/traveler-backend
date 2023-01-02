@@ -33,6 +33,11 @@ public class GlobalExceptionHandler {
         return new ResponseDto<>(HttpStatus.NOT_FOUND.value(), e.getErrorCode());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseDto handleForbiddenException(ForbiddenException e) {
+        return new ResponseDto<>(HttpStatus.FORBIDDEN.value(), e.getErrorCode());
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorResponse> handleArgumentException(Exception ex) {
 

@@ -22,22 +22,26 @@ public class PostApiController {
 
     // 게시글 작성
     @PostMapping("/")
-    public ResponseDto<PostDetailDto> createPost(@AuthenticationPrincipal UserAccount adapter
+    public ResponseDto<PostDetailDto> createPost(@AuthenticationPrincipal UserAccount account
             , @RequestBody PostRequestDto postDto) {
-        Post post = postService.write(postDto, adapter.getUser());
+        Post post = postService.write(postDto, account.getUser());
         return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post));
     }
 
     // 게시글 단일 조회
     @GetMapping("/{postId}")
     public ResponseDto<PostDetailDto> findPost(@PathVariable("postId") Long postId) {
-        Post post = postService.findOne(postId);
-        postService.view(post);
+        Post post = postService.view(postId);
         return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post));
     }
 
     // 게시글 수정
 
     // 게시글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseDto<PostDetailDto> deletePost(@AuthenticationPrincipal UserAccount account, @PathVariable("postId") Long postId) {
+        Post post = postService.delete(postId, account.getUser());
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post));
+    }
 
 }

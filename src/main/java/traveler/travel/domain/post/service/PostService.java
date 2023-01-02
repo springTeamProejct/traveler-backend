@@ -4,13 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.User;
+import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.entity.Post;
 import traveler.travel.domain.post.entity.Travel;
 import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.exception.BadRequestException;
+import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,8 @@ public class PostService {
                     .location(dto.getLocation())
                     .dateTime(dto.getDateTime())
                     .build();
+
+            validateTravelCondition(travel, writer);
             post.setTravel(travelRepository.save(travel));
         }
 
@@ -43,13 +50,15 @@ public class PostService {
 
     // 게시글 찾기
     public Post findOne(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P01"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P00"));
+        if (post.getDeletedAt() != null) throw new NotFoundException("P01");
         return post;
     }
 
     // 게시글 열람
     @Transactional
-    public Post view(Post post) {
+    public Post view(Long postId) {
+        Post post = findOne(postId);
         post.view();
         return post;
     }
@@ -57,4 +66,26 @@ public class PostService {
     // 게시글 수정
 
     // 게시글 삭제
+    @Transactional
+    public Post delete(Long postId, User writer) {
+        Post post = findOne(postId);
+
+        // 작성자만 수정,삭제할 수 있음
+        if (!post.getWriter().equals(writer)) {
+            throw new ForbiddenException("P02");
+        }
+
+        post.delete(); // 삭제 처리
+        return post;
+    }
+
+    // 유저가 여행 동행 조건을 만족하는지 체크
+    public void validateTravelCondition(Travel travel, User user) {
+        if (!travel.isGatherYn() // 모집중이 아니거나
+                || travel.getNowCnt() >= travel.getMaxCnt() // 모집 인원이 이미 찼거나
+                || travel.getDateTime().isBefore(LocalDateTime.now()) // 날짜가 지났거나
+                || travel.getMinAge() > user.getAge() || travel.getMaxAge() < user.getAge() // 나이가 안맞거나
+                || (!travel.getGender().equals(Gender.FREE) && !travel.getGender().equals(user.getGender())) // 성별이 안맞으면
+        ) throw new BadRequestException("P03"); // 조건 만족X 에러 반환
+    }
 }
