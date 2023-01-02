@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.global.dto.*;
@@ -16,6 +20,7 @@ import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
 import traveler.travel.global.util.RedisUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -100,6 +105,20 @@ public class UserApiController {
             // 인증 성공
             return new ResponseDto<String>(HttpStatus.OK.value(), "success");
         }
+    }
+
+    //회원 수정
+    @PutMapping("/{id}")
+    public ResponseDto<String> update(@PathVariable Long id, @RequestBody UserDto userDto){
+        userService.updateUser(id, userDto);
+
+        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
+    }
+
+    //전체 회원 리스트
+    @GetMapping("/all")
+    public List<UserDto> list(){
+        return userService.getUserList();
     }
 }
 

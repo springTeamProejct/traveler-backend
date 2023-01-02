@@ -1,6 +1,8 @@
 package traveler.travel.domain.account.entity;
 
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.enums.AccountType;
@@ -10,7 +12,8 @@ import traveler.travel.domain.post.entity.File;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-
+import java.util.ArrayDeque;
+import java.util.Collection;
 
 @Entity
 @Getter
@@ -39,12 +42,16 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    public void setAuthority(Authority authority){
-        this.authority = authority;
-    }
-
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setNickname(String nickname){
+        this.nickname = nickname;
     }
 
     public int getAge() {

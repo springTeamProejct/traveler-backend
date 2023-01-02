@@ -17,6 +17,10 @@ import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.jwt.TokenProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -97,5 +101,38 @@ public class UserService {
 
         // 토큰 발급
         return tokenDto;
+    }
+
+    @Transactional
+    public List<UserDto> getUserList(){
+        List<User> users = userRepository.findAllByOrderByIdAsc();
+        List<UserDto> userDtoList = new ArrayList<>();
+
+        for( User user : users){
+            UserDto userDto = UserDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .phoneNum(user.getPhoneNum())
+                    .birth(user.getBirth())
+                    .nickname(user.getNickname())
+                    .gender(String.valueOf(user.getGender()))
+                    .build();
+
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
+    }
+
+    @Transactional
+    public void updateUser(Long id, UserDto userDto){
+        Optional<User> user = userRepository.findById(id);
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        user.ifPresent(selectUser ->{
+            selectUser.setEmail(userDto.getEmail());
+            selectUser.setPassword(userDto.getPassword());
+            selectUser.setNickname(userDto.getNickname());
+        });
     }
 }
