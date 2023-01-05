@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import traveler.travel.domain.account.Login;
+import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.post.entity.Post;
 import traveler.travel.domain.post.service.PostService;
 import traveler.travel.global.dto.PostDetailDto;
@@ -22,9 +24,9 @@ public class PostApiController {
 
     // 게시글 작성
     @PostMapping("/")
-    public ResponseDto<PostDetailDto> createPost(@AuthenticationPrincipal UserAccount account
+    public ResponseDto<PostDetailDto> createPost(@Login User user
             , @RequestBody PostRequestDto postDto) {
-        Post post = postService.write(postDto, account.getUser());
+        Post post = postService.write(postDto, user);
         return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post));
     }
 
