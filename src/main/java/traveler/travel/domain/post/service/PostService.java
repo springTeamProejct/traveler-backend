@@ -52,7 +52,7 @@ public class PostService {
     // 게시글 찾기
     public Post findOne(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P00"));
-        if (post.getDeletedAt() != null) throw new NotFoundException("P01");
+        if (post.isDeleted()) throw new NotFoundException("P01");
         return post;
     }
 

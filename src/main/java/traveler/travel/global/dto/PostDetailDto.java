@@ -2,6 +2,7 @@ package traveler.travel.global.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.entity.Comment;
 import traveler.travel.domain.post.entity.Post;
@@ -10,6 +11,7 @@ import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.enums.TravelType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class PostDetailDto {
@@ -21,10 +23,13 @@ public class PostDetailDto {
     private Long writerId;
     private String writerName;
     private TravelDto travel;
-    private boolean isWriter;
+    private boolean isMine;
+
     private LocalDateTime createdAt;
 
-    public PostDetailDto(Post post, boolean isWriter) {
+    private List<CommentResponseDto> comments = new ArrayList<>();
+
+    public PostDetailDto(Post post, User user) {
         this.postId = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
@@ -38,7 +43,14 @@ public class PostDetailDto {
             this.travel = new TravelDto(post.getTravel());
         }
 
-        this.isWriter = isWriter;
+        if (user == null) isMine = false;
+        else isMine = writerId.equals(user.getId());
+
+        for (Comment comment : post.getComments()) {
+            if (comment.getParent() == null) {
+                this.comments.add(new CommentResponseDto(comment, user));
+            }
+        }
 
     }
 
@@ -73,24 +85,6 @@ public class PostDetailDto {
             this.gatherYn = travel.isGatherYn();
             this.maxCnt = travel.getMaxCnt();
             this.nowCnt = travel.getNowCnt();
-        }
-    }
-
-
-    @Getter
-    static class CommentResponseDto {
-        private Long writerId;
-        private String writerName;
-        private String content;
-        private LocalDateTime createdAt;
-        private boolean isDeleted;
-        private ArrayList<CommentResponseDto> children = new ArrayList<>();
-        public CommentResponseDto(Comment comment) {
-            this.writerId = comment.getWriter().getId();
-            this.writerName = comment.getWriter().getNickname();
-            this.content = comment.getContent();
-            this.createdAt = comment.getCreatedAt();
-            this.isDeleted = comment.getDeletedAt() == null;
         }
     }
 

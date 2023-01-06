@@ -26,15 +26,14 @@ public class PostApiController {
     public ResponseDto<PostDetailDto> createPost(@Login User user
             , @RequestBody PostRequestDto postDto) {
         Post post = postService.write(postDto, user);
-        return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post, true));
+        return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post, user));
     }
 
     // 게시글 단일 조회
     @GetMapping("/{postId}")
     public ResponseDto<PostDetailDto> findPost(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.view(postId);
-        boolean isWriter = postService.isWriter(user, post);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, isWriter));
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
     }
 
     // 게시글 수정
@@ -42,8 +41,7 @@ public class PostApiController {
     public ResponseDto<PostDetailDto> modifyPost(@Login User user, @PathVariable("postId") Long postId
             , @RequestBody PostUpdateDto postDto) {
         Post post = postService.update(postId, postDto, user);
-        boolean isWriter = postService.isWriter(user, post);
-        return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post, isWriter));
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
     }
 
 
@@ -51,7 +49,7 @@ public class PostApiController {
     @DeleteMapping("/{postId}")
     public ResponseDto<PostDetailDto> deletePost(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.delete(postId, user);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, true));
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
     }
 
 }

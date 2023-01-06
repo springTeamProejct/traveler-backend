@@ -9,6 +9,8 @@ import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.post.enums.Category;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +36,9 @@ public class Post extends BaseTimeEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     private Travel travel;
+
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
 
     public void setTravel(Travel travel) {
         this.travel = travel;
