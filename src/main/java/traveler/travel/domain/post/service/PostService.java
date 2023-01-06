@@ -85,9 +85,10 @@ public class PostService {
 
             travel.update(dto.getMaxCnt(), dto.getType(), dto.getGender()
                     , dto.getMaxAge(), dto.getMinAge()
-                    , dto.getXPos(), dto.getYPos(), dto.getLocation(), dto.getDateTime(), dto.getGatherYn());
+                    , dto.getXPos(), dto.getYPos(), dto.getLocation(), dto.getDateTime());
 
             validateTravelCondition(travel, writer);
+            travel.changeGatherYn(dto.getGatherYn());
         }
 
         post.update(dto.getTitle(), dto.getContent(), travel);

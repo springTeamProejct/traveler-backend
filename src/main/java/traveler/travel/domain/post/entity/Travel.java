@@ -50,7 +50,7 @@ public class Travel{
     }
 
     public void update(Integer maxCnt, TravelType travelType, Gender gender, Integer maxAge, Integer minAge
-            , Double xPos, Double yPos, String location, LocalDateTime dateTime, Boolean gatherYn) {
+            , Double xPos, Double yPos, String location, LocalDateTime dateTime) {
         if (maxCnt != null) this.maxCnt = maxCnt;
         if (travelType != null) this.travelType = travelType;
         if (gender != null) this.gender = gender;
@@ -60,6 +60,5 @@ public class Travel{
         if (yPos != null) this.yPos = yPos;
         if (location != null) this.location = location;
         if (dateTime != null) this.dateTime = dateTime;
-        if (gatherYn != null) changeGatherYn(gatherYn);
     }
 }
