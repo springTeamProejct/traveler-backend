@@ -11,6 +11,7 @@ import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.dto.PostUpdateDto;
 import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
@@ -64,6 +65,36 @@ public class PostService {
     }
 
     // 게시글 수정
+    @Transactional
+    public Post update(Long postId, PostUpdateDto dto, User writer) {
+        Post post = findOne(postId);
+
+        // 작성자만 수정,삭제할 수 있음
+        if (!post.getWriter().equals(writer)) {
+            throw new ForbiddenException("P02");
+        }
+
+        Travel travel = post.getTravel();
+
+        if (post.getCategory().equals(Category.TRAVEL)) {
+
+            // 자기 자신 외로 누가 더 참여해있으면 수정 불가
+            if (travel.getNowCnt() > 1) {
+                throw new ForbiddenException("P04");
+            }
+
+            travel.update(dto.getMaxCnt(), dto.getType(), dto.getGender()
+                    , dto.getMaxAge(), dto.getMinAge()
+                    , dto.getXPos(), dto.getYPos(), dto.getLocation(), dto.getDateTime(), dto.getGatherYn());
+
+            validateTravelCondition(travel, writer);
+        }
+
+        post.update(dto.getTitle(), dto.getContent(), travel);
+
+        return post;
+    }
+
 
     // 게시글 삭제
     @Transactional

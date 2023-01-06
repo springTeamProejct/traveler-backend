@@ -3,7 +3,6 @@ package traveler.travel.domain.post.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.domain.account.Login;
 import traveler.travel.domain.account.entity.User;
@@ -11,8 +10,8 @@ import traveler.travel.domain.post.entity.Post;
 import traveler.travel.domain.post.service.PostService;
 import traveler.travel.global.dto.PostDetailDto;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.dto.PostUpdateDto;
 import traveler.travel.global.dto.ResponseDto;
-import traveler.travel.jwt.UserAccount;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,11 +37,18 @@ public class PostApiController {
     }
 
     // 게시글 수정
+    @PatchMapping("/{postId}")
+    public ResponseDto<PostDetailDto> modifyPost(@Login User user, @PathVariable("postId") Long postId
+            , @RequestBody PostUpdateDto postDto) {
+        Post post = postService.update(postId, postDto, user);
+        return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post));
+    }
+
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
-    public ResponseDto<PostDetailDto> deletePost(@AuthenticationPrincipal UserAccount account, @PathVariable("postId") Long postId) {
-        Post post = postService.delete(postId, account.getUser());
+    public ResponseDto<PostDetailDto> deletePost(@Login User user, @PathVariable("postId") Long postId) {
+        Post post = postService.delete(postId, user);
         return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post));
     }
 
