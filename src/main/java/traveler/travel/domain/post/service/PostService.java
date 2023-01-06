@@ -70,7 +70,7 @@ public class PostService {
         Post post = findOne(postId);
 
         // 작성자만 수정,삭제할 수 있음
-        if (!post.getWriter().equals(writer)) {
+        if (!isWriter(writer, post)) {
             throw new ForbiddenException("P02");
         }
 
@@ -102,7 +102,7 @@ public class PostService {
         Post post = findOne(postId);
 
         // 작성자만 수정,삭제할 수 있음
-        if (!post.getWriter().equals(writer)) {
+        if (!isWriter(writer, post)) {
             throw new ForbiddenException("P02");
         }
 
@@ -118,5 +118,10 @@ public class PostService {
                 || travel.getMinAge() > user.getAge() || travel.getMaxAge() < user.getAge() // 나이가 안맞거나
                 || (!travel.getGender().equals(Gender.FREE) && !travel.getGender().equals(user.getGender())) // 성별이 안맞으면
         ) throw new BadRequestException("P03"); // 조건 만족X 에러 반환
+    }
+
+    public boolean isWriter(User user, Post post) {
+        if (user == null) return false;
+        return post.getWriter().equals(user);
     }
 }
