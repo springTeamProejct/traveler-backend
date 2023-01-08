@@ -11,6 +11,7 @@ import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.dto.PostUpdateDto;
 import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
@@ -51,7 +52,7 @@ public class PostService {
     // 게시글 찾기
     public Post findOne(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("P00"));
-        if (post.getDeletedAt() != null) throw new NotFoundException("P01");
+        if (post.isDeleted()) throw new NotFoundException("P01");
         return post;
     }
 
@@ -64,6 +65,37 @@ public class PostService {
     }
 
     // 게시글 수정
+    @Transactional
+    public Post update(Long postId, PostUpdateDto dto, User writer) {
+        Post post = findOne(postId);
+
+        // 작성자만 수정,삭제할 수 있음
+        if (!isWriter(writer, post)) {
+            throw new ForbiddenException("P02");
+        }
+
+        Travel travel = post.getTravel();
+
+        if (post.getCategory().equals(Category.TRAVEL)) {
+
+            // 자기 자신 외로 누가 더 참여해있으면 수정 불가
+            if (travel.getNowCnt() > 1) {
+                throw new ForbiddenException("P04");
+            }
+
+            travel.update(dto.getMaxCnt(), dto.getType(), dto.getGender()
+                    , dto.getMaxAge(), dto.getMinAge()
+                    , dto.getXPos(), dto.getYPos(), dto.getLocation(), dto.getDateTime());
+
+            validateTravelCondition(travel, writer);
+            travel.changeGatherYn(dto.getGatherYn());
+        }
+
+        post.update(dto.getTitle(), dto.getContent(), travel);
+
+        return post;
+    }
+
 
     // 게시글 삭제
     @Transactional
@@ -71,7 +103,7 @@ public class PostService {
         Post post = findOne(postId);
 
         // 작성자만 수정,삭제할 수 있음
-        if (!post.getWriter().equals(writer)) {
+        if (!isWriter(writer, post)) {
             throw new ForbiddenException("P02");
         }
 
@@ -87,5 +119,10 @@ public class PostService {
                 || travel.getMinAge() > user.getAge() || travel.getMaxAge() < user.getAge() // 나이가 안맞거나
                 || (!travel.getGender().equals(Gender.FREE) && !travel.getGender().equals(user.getGender())) // 성별이 안맞으면
         ) throw new BadRequestException("P03"); // 조건 만족X 에러 반환
+    }
+
+    public boolean isWriter(User user, Post post) {
+        if (user == null) return false;
+        return post.getWriter().equals(user);
     }
 }
