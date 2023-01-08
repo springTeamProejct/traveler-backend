@@ -1,6 +1,7 @@
 package traveler.travel.domain.account.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -9,12 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
+import traveler.travel.domain.post.entity.Post;
 import traveler.travel.global.dto.EmailLoginRequestDto;
 import traveler.travel.global.dto.TokenDto;
 import traveler.travel.global.dto.TokenRequestDto;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
+import traveler.travel.global.exception.ForbiddenException;
+import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.jwt.TokenProvider;
 
 import java.util.ArrayList;
@@ -24,6 +28,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -103,6 +108,8 @@ public class UserService {
         return tokenDto;
     }
 
+    //가입된 유저의 전체 정보 출력
+    //관리자만 기능 사용 가능
     @Transactional
     public List<UserDto> getUserList(){
         List<User> users = userRepository.findAllByOrderByIdAsc();
@@ -124,6 +131,7 @@ public class UserService {
         return userDtoList;
     }
 
+    //회원 수정
     @Transactional
     public void updateUser(Long id, UserDto userDto){
         Optional<User> user = userRepository.findById(id);
@@ -135,4 +143,66 @@ public class UserService {
             selectUser.setNickname(userDto.getNickname());
         });
     }
+
+    //회원 당사자만 기능 사용 가능
+    @Transactional
+    public UserDto getUser(Long id){
+        Optional<User> usersWrapper = userRepository.findById(id);
+        User user = usersWrapper.get();
+
+        return UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .phoneNum(user.getPhoneNum())
+                .birth(user.getBirth())
+                .nickname(user.getNickname())
+                .gender(String.valueOf(user.getGender()))
+                .build();
+    }
+
+    //user 탈퇴
+    @Transactional
+    public User deleteUser(Long id, UserDto userDto){
+
+        //이메일을 통해서 db 조회가 필요하다.
+        User user = findOne(id);
+
+        //로그인한 사람이 자신일 경우에만 삭제 가능.
+        //-> 비밀번호 확인을 통해 본인인증 확인.
+        boolean matches = checkPassword(id, userDto.getPassword());
+        if(matches == false){
+            throw new NotFoundException("J06");
+        }
+
+        user.delete();
+        return user;
+    }
+
+    //비밀번호 일치 확인
+    public boolean checkPassword(Long id, String checkUserPassword){
+
+        //db에 있지 않은 id 값
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("L00"));
+
+        String realPassword = user.getPassword();
+        boolean matches = passwordEncoder.matches(checkUserPassword, realPassword);
+        return matches;
+    }
+
+    //user 아이디 찾기
+    public User findOne(Long userId) {
+
+        //아이디가 존재하지 않는 경우
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("L00"));
+
+        //이미 삭제된 아이디일 경우
+        if (user.getDeletedAt() != null) {
+            throw new NotFoundException("L07");
+        }
+        return user;
+    }
 }
+

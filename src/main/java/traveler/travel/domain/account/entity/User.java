@@ -1,8 +1,6 @@
 package traveler.travel.domain.account.entity;
 
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.enums.AccountType;
@@ -12,8 +10,6 @@ import traveler.travel.domain.post.entity.File;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayDeque;
-import java.util.Collection;
 
 @Entity
 @Getter
@@ -22,7 +18,8 @@ import java.util.Collection;
 @Builder
 public class User extends BaseTimeEntity{
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
