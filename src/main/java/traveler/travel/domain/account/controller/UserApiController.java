@@ -126,8 +126,8 @@ public class UserApiController {
 
     //전체 회원 리스트
     @GetMapping("/all")
-    public List<UserDto> list(){
-        return userService.getUserList();
+    public List<UserDto> list(@RequestBody UserDto userDto){
+        return userService.getAllUserList(userDto);
     }
 
     //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)

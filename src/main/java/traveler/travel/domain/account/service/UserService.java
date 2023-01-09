@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.RefreshToken;
+import traveler.travel.domain.account.enums.Authority;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
 import traveler.travel.domain.post.entity.Post;
 import traveler.travel.global.dto.EmailLoginRequestDto;
@@ -111,7 +112,14 @@ public class UserService {
     //가입된 유저의 전체 정보 출력
     //관리자만 기능 사용 가능
     @Transactional
-    public List<UserDto> getUserList(){
+    public List<UserDto> getAllUserList(UserDto adminInfo){
+        //AdminInfo를 통해서 권한 체크
+        boolean authMatches = checkAuthority(adminInfo.getEmail(), adminInfo.getAuthority());
+
+        if(authMatches == false){
+            throw new ForbiddenException("접근 권한이 없습니다.");
+        }
+
         List<User> users = userRepository.findAllByOrderByIdAsc();
         List<UserDto> userDtoList = new ArrayList<>();
 
@@ -189,6 +197,23 @@ public class UserService {
         String realPassword = user.getPassword();
         boolean matches = passwordEncoder.matches(checkUserPassword, realPassword);
         return matches;
+    }
+
+    //회원의 권한 확인
+    public boolean checkAuthority(String email, Authority authority){
+
+        //email을 통해서 db에서 조회 후, 값이 없다면 exception
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new NotFoundException("L00"));
+
+        //db에서 찾은 권한
+        String adminAuth = String.valueOf(user.getAuthority());
+
+        //만약 받은 권한과 db에서 찾은 권한이 같다면 true, 아니면 false
+        if(adminAuth == "ROLE_ADMIN"){
+            return true;
+        }
+        return false;
     }
 
     //user 아이디 찾기
