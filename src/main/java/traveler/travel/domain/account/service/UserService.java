@@ -18,6 +18,7 @@ import traveler.travel.global.dto.TokenRequestDto;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
+import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.jwt.TokenProvider;
@@ -114,10 +115,10 @@ public class UserService {
     @Transactional
     public List<UserDto> getAllUserList(UserDto adminInfo){
         //AdminInfo를 통해서 권한 체크
-        boolean authMatches = checkAuthority(adminInfo.getEmail(), adminInfo.getAuthority());
+        boolean authMatches = checkAuthority(adminInfo.getEmail());
 
         if(authMatches == false){
-            throw new ForbiddenException("접근 권한이 없습니다.");
+            throw new BadRequestException("J08");
         }
 
         List<User> users = userRepository.findAllByOrderByIdAsc();
@@ -140,9 +141,21 @@ public class UserService {
     }
 
     //회원 수정
+    //본인만 회원 수정이 가능할 수 있게 조건 추가 필요.
     @Transactional
     public void updateUser(Long id, UserDto userDto){
+
+        //id를 통해서 db에서 해당하는 정보를 갖고온다.
         Optional<User> user = userRepository.findById(id);
+
+        //해당하는 정보를 통해서 본인인지 확인하기. -> 비밀번호를 통해서 본인인지 확인하기.
+//        boolean matches = checkPassword(id, checkUserPassword);
+
+        //false라면 에러, True라면 회원 수정 기능 사용가능.
+//        if(matches == false){
+//            throw new NotFoundException("J06");
+//        }
+
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         user.ifPresent(selectUser ->{
@@ -152,10 +165,18 @@ public class UserService {
         });
     }
 
+    //단일 회원 정보 확인 기능
     //회원 당사자만 기능 사용 가능
     @Transactional
-    public UserDto getUser(Long id){
+    public UserDto getUser(Long id, UserDto userDto){
         Optional<User> usersWrapper = userRepository.findById(id);
+        //비밀번호를 입력해서 본인인증 절차
+        boolean matches = checkPassword(id, userDto.getPassword());
+
+        if(matches == false){
+            throw new BadRequestException("J06");
+        }
+
         User user = usersWrapper.get();
 
         return UserDto.builder()
@@ -166,10 +187,12 @@ public class UserService {
                 .birth(user.getBirth())
                 .nickname(user.getNickname())
                 .gender(String.valueOf(user.getGender()))
+                .authority(user.getAuthority())
                 .build();
     }
 
     //user 탈퇴
+    //비밀번호 확인을 통해서 본인 인증
     @Transactional
     public User deleteUser(Long id, UserDto userDto){
 
@@ -180,7 +203,7 @@ public class UserService {
         //-> 비밀번호 확인을 통해 본인인증 확인.
         boolean matches = checkPassword(id, userDto.getPassword());
         if(matches == false){
-            throw new NotFoundException("J06");
+            throw new BadRequestException("J06");
         }
 
         user.delete();
@@ -200,11 +223,11 @@ public class UserService {
     }
 
     //회원의 권한 확인
-    public boolean checkAuthority(String email, Authority authority){
+    public boolean checkAuthority(String email){
 
         //email을 통해서 db에서 조회 후, 값이 없다면 exception
         User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new NotFoundException("L00"));
+                new BadRequestException("L00"));
 
         //db에서 찾은 권한
         String adminAuth = String.valueOf(user.getAuthority());
@@ -221,11 +244,11 @@ public class UserService {
 
         //아이디가 존재하지 않는 경우
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("L00"));
+                new BadRequestException("L00"));
 
         //이미 삭제된 아이디일 경우
         if (user.getDeletedAt() != null) {
-            throw new NotFoundException("L07");
+            throw new BadRequestException("L07");
         }
         return user;
     }

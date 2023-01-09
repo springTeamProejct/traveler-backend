@@ -42,8 +42,7 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
-    // /users
-    public ResponseDto<?> save (@RequestBody UserDto user){
+    public ResponseDto<String> save (@RequestBody UserDto user){
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
@@ -51,12 +50,7 @@ public class UserApiController {
 
         user.setPassword(encoder.encode(user.getPassword()));
         userService.join(user);
-        return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
-    }
-
-    public Optional<User> findUserByEmail(String email){
-        Optional<User> alreadyUser = userRepository.findByEmail(email);
-        return alreadyUser;
+        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
 
     @PostMapping("/login")
@@ -64,6 +58,7 @@ public class UserApiController {
         return ResponseEntity.ok(userService.login(dto));
     }
 
+    //token 생성
     @PostMapping("/reissue")
     public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(userService.reissue(tokenRequestDto));
@@ -111,17 +106,18 @@ public class UserApiController {
 
     //회원 수정
     @PutMapping("/{id}")
-    public ResponseDto<String> updateUser(@PathVariable Long id, @RequestBody UserDto userDto){
+    public ResponseDto<String> updateUser(@PathVariable Long id,
+                                          @RequestBody UserDto userDto){
         userService.updateUser(id, userDto);
 
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
 
 
-    //회원 상세
+    //단일 회원 정보 확인 기능
     @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable Long id){
-        return userService.getUser(id);
+    public UserDto getUser(@PathVariable Long id, @RequestBody UserDto userDto){
+        return userService.getUser(id, userDto);
     }
 
     //전체 회원 리스트
@@ -133,9 +129,7 @@ public class UserApiController {
     //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)
     @DeleteMapping("/{id}")
     public ResponseDto<String> deleteUser(@PathVariable Long id,
-                                          @RequestBody UserDto userDto,
-                                          @AuthenticationPrincipal UserAccount account){
-        //이메일만 갖고 db에서
+                                          @RequestBody UserDto userDto){
         userService.deleteUser(id, userDto);
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
