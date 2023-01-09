@@ -4,11 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.global.dto.*;
@@ -20,9 +15,7 @@ import traveler.travel.domain.account.service.MailService;
 import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
 import traveler.travel.global.util.RedisUtil;
-import traveler.travel.jwt.UserAccount;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -108,38 +101,5 @@ public class UserApiController {
             return new ResponseDto<String>(HttpStatus.OK.value(), "success");
         }
     }
-
-    //회원 수정
-    @PutMapping("/{id}")
-    public ResponseDto<String> updateUser(@PathVariable Long id, @RequestBody UserDto userDto){
-        userService.updateUser(id, userDto);
-
-        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
-    }
-
-
-    //회원 상세
-    @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable Long id){
-        return userService.getUser(id);
-    }
-
-    //전체 회원 리스트
-    @GetMapping("/all")
-    public List<UserDto> list(@RequestBody UserDto userDto){
-        return userService.getAllUserList(userDto);
-    }
-
-    //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)
-    @DeleteMapping("/{id}")
-    public ResponseDto<String> deleteUser(@PathVariable Long id,
-                                          @RequestBody UserDto userDto,
-                                          @AuthenticationPrincipal UserAccount account){
-        //이메일만 갖고 db에서
-        userService.deleteUser(id, userDto);
-        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
-    }
-
-
 }
 
