@@ -9,9 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.RefreshToken;
-import traveler.travel.domain.account.enums.Authority;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
-import traveler.travel.domain.post.entity.Post;
 import traveler.travel.global.dto.EmailLoginRequestDto;
 import traveler.travel.global.dto.TokenDto;
 import traveler.travel.global.dto.TokenRequestDto;
@@ -19,7 +17,6 @@ import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.global.exception.BadRequestException;
-import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.jwt.TokenProvider;
 
@@ -223,6 +220,7 @@ public class UserService {
     }
 
     //회원의 권한 확인
+    //시큐리티 컨피그에서 사용하게끔 수정 필요. -> 로그인을 하고 나서 권한을 admin만 가능하게요... 수정
     public boolean checkAuthority(String email){
 
         //email을 통해서 db에서 조회 후, 값이 없다면 exception
@@ -250,6 +248,7 @@ public class UserService {
         if (user.getDeletedAt() != null) {
             throw new BadRequestException("L07");
         }
+
         return user;
     }
 }
