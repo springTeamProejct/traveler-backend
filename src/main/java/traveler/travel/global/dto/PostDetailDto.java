@@ -20,6 +20,7 @@ public class PostDetailDto {
     private String content;
     private String category;
     private int views;
+    private int likes;
     private Long writerId;
     private String writerName;
     private TravelDto travel;
@@ -38,6 +39,7 @@ public class PostDetailDto {
         this.writerId = post.getWriter().getId();
         this.writerName = post.getWriter().getNickname();
         this.createdAt = post.getCreatedAt();
+        likes = post.getLikes().size();
 
         if (post.getCategory().equals(Category.TRAVEL)) {
             this.travel = new TravelDto(post.getTravel());

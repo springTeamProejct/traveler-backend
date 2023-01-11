@@ -5,9 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Gender;
+import traveler.travel.domain.post.entity.Like;
+import traveler.travel.domain.post.entity.LikeId;
 import traveler.travel.domain.post.entity.Post;
 import traveler.travel.domain.post.entity.Travel;
 import traveler.travel.domain.post.enums.Category;
+import traveler.travel.domain.post.repository.LikeRepository;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
@@ -17,6 +20,7 @@ import traveler.travel.global.exception.ForbiddenException;
 import traveler.travel.global.exception.NotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final TravelRepository travelRepository;
+    private final LikeRepository likeRepository;
 
     // 게시글 작성
     @Transactional
@@ -32,15 +37,7 @@ public class PostService {
         Post post = dto.toPost(writer);
 
         if (dto.getCategory().equals(Category.TRAVEL)) {
-            Travel travel = Travel.builder()
-                    .travelType(dto.getType())
-                    .gender(dto.getGender())
-                    .minAge(dto.getMinAge())
-                    .maxAge(dto.getMaxAge())
-                    .maxCnt(dto.getMaxCnt())
-                    .location(dto.getLocation())
-                    .dateTime(dto.getDateTime())
-                    .build();
+            Travel travel = dto.toTravel();
 
             validateTravelCondition(travel, writer);
             post.setTravel(travelRepository.save(travel));
@@ -108,6 +105,25 @@ public class PostService {
         }
 
         post.delete(); // 삭제 처리
+        return post;
+    }
+
+    // 게시글 좋아요
+    @Transactional
+    public Post updateLike(Long postId, User user) {
+        Post post = findOne(postId);
+        LikeId likeId = new LikeId(postId, user.getId());
+
+        // 좋아요 안누른 게시글이면 좋아요 생성하고, 이미 누른 게시글이면 좋아요 취소
+        Optional<Like> like = likeRepository.findById(likeId);
+        if (like.isPresent()) {
+            likeRepository.delete(like.get());
+            post.cancelLike(like.get());
+        } else {
+            Like savedLike = likeRepository.save(new Like(likeId));
+            post.addLike(savedLike);
+        }
+
         return post;
     }
 

@@ -52,4 +52,10 @@ public class PostApiController {
         return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
     }
 
+    // 게시글 좋아요
+    @PostMapping("/{postId}/like")
+    public ResponseDto<PostDetailDto> likeUpdate(@Login User user, @PathVariable("postId") Long postId) {
+        Post post = postService.updateLike(postId, user);
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+    }
 }
