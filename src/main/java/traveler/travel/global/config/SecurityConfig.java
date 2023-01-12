@@ -58,9 +58,15 @@ public class SecurityConfig {
                 // 로그인, 회원가입 API 는 토큰이 없는 상태에서 요청이 들어오기 때문에 permitAll 설정
                 .and()
                 .authorizeRequests()
+//                .antMatchers("/users/{id}").authenticated() // /users/{id} 요청에 대해서는 로그인을 요구한다.
+//                .antMatchers("/users/all").hasRole("ROLE_ADMIN")    // /users/all 요청에 대해서는 ROLE_ADMIN 권한 필요.
                 .antMatchers("/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/posts/**").permitAll() // 게시글 조회는 로그인 안해도 가능
                 .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
+
+//                .and()
+//                .formLogin()
+//                .loginPage("/users/login")  //로그인 페이지를 제공하는 url을 설정.
 
                 // JwtFilter 를 addFilterBefore 로 등록했던 JwtSecurityConfig 클래스를 적용
                 .and()

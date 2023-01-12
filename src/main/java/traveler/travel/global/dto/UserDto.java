@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Authority;
 
 import javax.validation.constraints.NotBlank;
@@ -33,5 +32,6 @@ public class UserDto {
     private String gender;
 
     private Authority authority;
+
 
 }

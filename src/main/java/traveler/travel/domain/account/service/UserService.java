@@ -1,7 +1,6 @@
 package traveler.travel.domain.account.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -10,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
-import traveler.travel.global.dto.EmailLoginRequestDto;
-import traveler.travel.global.dto.TokenDto;
-import traveler.travel.global.dto.TokenRequestDto;
-import traveler.travel.global.dto.UserDto;
+import traveler.travel.domain.post.entity.Post;
+import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.global.exception.BadRequestException;
@@ -27,7 +24,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -39,6 +35,7 @@ public class UserService {
     //일반 회원 가입
     @Transactional
     public void join(UserDto userDto) {
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
 
         userRepository.save(user);
@@ -59,7 +56,7 @@ public class UserService {
         UsernamePasswordAuthenticationToken authenticationToken = dto.toAuthentication();
 
         // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
-        //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
+        //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 UserByUsername 메서드가 실행됨
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         // 3. 인증 정보를 기반으로 JWT 토큰 생성
@@ -112,11 +109,11 @@ public class UserService {
     @Transactional
     public List<UserDto> getAllUserList(UserDto adminInfo){
         //AdminInfo를 통해서 권한 체크
-        boolean authMatches = checkAuthority(adminInfo.getEmail());
+//        boolean authMatches = checkAuthority(adminInfo.getEmail());
 
-        if(authMatches == false){
-            throw new BadRequestException("J08");
-        }
+//        if(authMatches == false){
+//            throw new BadRequestException("J08");
+//        }
 
         List<User> users = userRepository.findAllByOrderByIdAsc();
         List<UserDto> userDtoList = new ArrayList<>();
@@ -140,50 +137,45 @@ public class UserService {
     //회원 수정
     //본인만 회원 수정이 가능할 수 있게 조건 추가 필요.
     @Transactional
-    public void updateUser(Long id, UserDto userDto){
+    public void updateUser(Long id, UpdateUserDto userDto, User user){
 
-        //id를 통해서 db에서 해당하는 정보를 갖고온다.
-        Optional<User> user = userRepository.findById(id);
+        User userInfo = findOne(id);
 
-        //해당하는 정보를 통해서 본인인지 확인하기. -> 비밀번호를 통해서 본인인지 확인하기.
-//        boolean matches = checkPassword(id, checkUserPassword);
-
-        //false라면 에러, True라면 회원 수정 기능 사용가능.
-//        if(matches == false){
-//            throw new NotFoundException("J06");
-//        }
+        //로그인한 사람이 본인일 경우에만 메소드 사용 가능.
+        //RefreshToken의 유무로 user의 로그인 확인 가능.
 
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-        user.ifPresent(selectUser ->{
-            selectUser.setEmail(userDto.getEmail());
-            selectUser.setPassword(userDto.getPassword());
-            selectUser.setNickname(userDto.getNickname());
-        });
+        userInfo.updateUser(userDto.getEmail(),
+                userDto.getPassword(),
+                userDto.getNickname(),
+                userDto.getProfileImg(),
+                userDto.getPhoneNum());
     }
 
     //단일 회원 정보 확인 기능
     //회원 당사자만 기능 사용 가능
     @Transactional
-    public UserDto getUser(Long id, UserDto userDto){
-        Optional<User> usersWrapper = userRepository.findById(id);
-        //비밀번호를 입력해서 본인인증 절차
-        boolean matches = checkPassword(id, userDto.getPassword());
+    public User getUser(Long id, User userDto){
+        Optional<User> usersWrapper = Optional.ofNullable(findOne(id));
 
-        if(matches == false){
-            throw new BadRequestException("J06");
-        }
+        //비밀번호를 입력해서 본인인증 절차
+//        boolean matches = checkPassword(id, userDto.getPassword());
+//
+//        if(matches == false){
+//            throw new BadRequestException("J06");
+//        }
 
         User user = usersWrapper.get();
 
-        return UserDto.builder()
+        return User.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .phoneNum(user.getPhoneNum())
                 .birth(user.getBirth())
                 .nickname(user.getNickname())
-                .gender(String.valueOf(user.getGender()))
+                .gender(user.getGender())
                 .authority(user.getAuthority())
                 .build();
     }
@@ -191,7 +183,7 @@ public class UserService {
     //user 탈퇴
     //비밀번호 확인을 통해서 본인 인증
     @Transactional
-    public User deleteUser(Long id, UserDto userDto){
+    public User deleteUser(Long id, GetUserAndDeleteDto userDto){
 
         //이메일을 통해서 db 조회가 필요하다.
         User user = findOne(id);
@@ -244,12 +236,13 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new BadRequestException("L00"));
 
-        //이미 삭제된 아이디일 경우
-        if (user.getDeletedAt() != null) {
-            throw new BadRequestException("L07");
+        //이미 삭제된 아이디일 경우 true, 삭제가 안된 경우 false
+        boolean matches = user.isDeleted();
+
+        if(matches == true){
+            throw new BadRequestException("J07");
         }
 
         return user;
     }
 }
-

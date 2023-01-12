@@ -1,16 +1,21 @@
 package traveler.travel.domain.post.entity;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.post.enums.Category;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Inheritance(strategy = InheritanceType.JOINED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +37,9 @@ public class Post extends BaseTimeEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private Travel travel;
 
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
+
     public void setTravel(Travel travel) {
         this.travel = travel;
     }
@@ -47,9 +55,13 @@ public class Post extends BaseTimeEntity {
         viewCnt = 0;
     }
 
-    protected Post() {}
-
     public void view() {
         viewCnt += 1;
+    }
+
+    public void update(String title, String content, Travel travel) {
+        if (title != null) this.title = title;
+        if (content != null) this.content = content;
+        if (travel != null) this.travel = travel;
     }
 }

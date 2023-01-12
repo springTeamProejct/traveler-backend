@@ -10,6 +10,8 @@ import traveler.travel.domain.post.entity.File;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 
 @Entity
 @Getter
@@ -18,8 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 public class User extends BaseTimeEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -39,13 +40,18 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    public void setAuthority(Authority authority){
+        this.authority = authority;
+    }
+
     public void setPassword(String password){
         this.password = password;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(String email){
         this.email = email;
     }
+
 
     public void setNickname(String nickname){
         this.nickname = nickname;
@@ -67,5 +73,26 @@ public class User extends BaseTimeEntity{
                 .gender(Gender.valueOf(userDto.getGender()))
                 .build();
         return user;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User)) {
+            return false;
+        }
+        final User user = (User) o;
+        return Objects.equals(id, user.getId());
+    }
+
+    //update하는 메소드
+    public void updateUser(String email, String password, String nickname, File profileImg, String phoneNum){
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.profileImg = profileImg;
+        this.phoneNum = phoneNum;
     }
 }

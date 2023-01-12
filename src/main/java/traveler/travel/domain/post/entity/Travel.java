@@ -44,4 +44,21 @@ public class Travel{
         nowCnt = 1;
         gatherYn = true;
     }
+
+    public void changeGatherYn(boolean tf) {
+        gatherYn = tf;
+    }
+
+    public void update(Integer maxCnt, TravelType travelType, Gender gender, Integer maxAge, Integer minAge
+            , Double xPos, Double yPos, String location, LocalDateTime dateTime) {
+        if (maxCnt != null) this.maxCnt = maxCnt;
+        if (travelType != null) this.travelType = travelType;
+        if (gender != null) this.gender = gender;
+        if (minAge != null) this.minAge = minAge;
+        if (maxAge != null) this.maxAge = maxAge;
+        if (xPos != null) this.xPos = xPos;
+        if (yPos != null) this.yPos = yPos;
+        if (location != null) this.location = location;
+        if (dateTime != null) this.dateTime = dateTime;
+    }
 }

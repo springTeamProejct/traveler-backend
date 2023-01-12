@@ -21,4 +21,8 @@ public abstract class BaseTimeEntity {
     public void delete() {
         deletedAt = LocalDateTime.now();
     }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
 }

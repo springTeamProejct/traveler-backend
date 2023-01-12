@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import traveler.travel.domain.account.Login;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
@@ -31,8 +32,6 @@ public class UserApiController {
 
     private final UserRepository userRepository;
 
-    private final PasswordEncoder encoder;
-
 
     //유저 회원가입
     @PostMapping()
@@ -42,7 +41,6 @@ public class UserApiController {
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        user.setPassword(encoder.encode(user.getPassword()));
         userService.join(user);
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
@@ -100,9 +98,10 @@ public class UserApiController {
 
     //회원 수정
     @PutMapping("/{id}")
-    public ResponseDto<String> updateUser(@PathVariable Long id,
-                                          @RequestBody UserDto userDto){
-        userService.updateUser(id, userDto);
+    public ResponseDto<String> updateUser(@Login User user,
+                                            @PathVariable Long id,
+                                          @RequestBody UpdateUserDto userDto){
+        userService.updateUser(id, userDto, user);
 
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
@@ -110,8 +109,9 @@ public class UserApiController {
 
     //단일 회원 정보 확인 기능
     @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable Long id, @RequestBody UserDto userDto){
-        return userService.getUser(id, userDto);
+    public User getUser(@Login User user,
+                           @PathVariable Long id){
+        return userService.getUser(id, user);
     }
 
     //전체 회원 리스트
@@ -123,7 +123,7 @@ public class UserApiController {
     //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)
     @DeleteMapping("/{id}")
     public ResponseDto<String> deleteUser(@PathVariable Long id,
-                                          @RequestBody UserDto userDto){
+                                          @RequestBody GetUserAndDeleteDto userDto){
         userService.deleteUser(id, userDto);
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
