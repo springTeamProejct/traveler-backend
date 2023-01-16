@@ -2,11 +2,13 @@ package traveler.travel.domain.account.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.domain.account.Login;
+import traveler.travel.domain.account.repository.UserImgRepository;
+import traveler.travel.domain.post.entity.File;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
@@ -35,13 +37,14 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
-    public ResponseDto<String> save (@RequestBody UserDto user){
+    public ResponseDto<String> save (UserDto user, UserImageUpDto userImageUpDto){
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        userService.join(user);
+        userService.join(user, userImageUpDto);
+
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
 
@@ -102,6 +105,8 @@ public class UserApiController {
                                             @PathVariable Long id,
                                           @RequestBody UpdateUserDto userDto){
         userService.updateUser(id, userDto, user);
+
+        //본인은 본인 정보만 수정 가능 -> Login한 사람이 로그인
 
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }

@@ -40,21 +40,8 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    public void setAuthority(Authority authority){
-        this.authority = authority;
-    }
-
-    public void setPassword(String password){
-        this.password = password;
-    }
-
-    public void setEmail(String email){
-        this.email = email;
-    }
-
-
-    public void setNickname(String nickname){
-        this.nickname = nickname;
+    public void updateProfileImg(File file){
+        this.profileImg = file;
     }
 
     public int getAge() {

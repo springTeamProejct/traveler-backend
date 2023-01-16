@@ -58,9 +58,13 @@ public class SecurityConfig {
                 // 로그인, 회원가입 API 는 토큰이 없는 상태에서 요청이 들어오기 때문에 permitAll 설정
                 .and()
                 .authorizeRequests()
-//                .antMatchers("/users/{id}").authenticated() // /users/{id} 요청에 대해서는 로그인을 요구한다.
-//                .antMatchers("/users/all").hasRole("ROLE_ADMIN")    // /users/all 요청에 대해서는 ROLE_ADMIN 권한 필요.
+//                .antMatchers("/users/all")
+//                .access("hasRole('ROLE_ADMIN')")    // /users/all 요청에 대해서는 ROLE_ADMIN 권한 필요.
                 .antMatchers("/users/**").permitAll()
+//                        "/users/login", "/users/signup/**", "/users/reissue", "/users").permitAll()
+//                .antMatchers(HttpMethod.GET,"/users/**").authenticated() // 회원 수정, 회원 탈퇴, 단일 회원 정보 조회 요청에 대해서는 로그인을 요구한다.
+//                .antMatchers(HttpMethod.DELETE, "users/**").authenticated()
+//                .antMatchers(HttpMethod.PUT, "users/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/posts/**").permitAll() // 게시글 조회는 로그인 안해도 가능
                 .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
 
