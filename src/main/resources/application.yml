@@ -53,9 +53,6 @@ spring:
     port: 6379
     password:
 
-cos:
-  key: cos1234
-
 ncp-sms:
   accessKey: 6XgrJJvXNrM5moQrzuqR
   secretKey: GoC9gVDZ6brASLWxbR941WqX3RrZFy5X3G2gH2RN

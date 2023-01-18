@@ -7,15 +7,26 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
-import traveler.travel.global.dto.EmailLoginRequestDto;
-import traveler.travel.global.dto.TokenDto;
-import traveler.travel.global.dto.TokenRequestDto;
-import traveler.travel.global.dto.UserDto;
+import traveler.travel.domain.account.repository.UserImgRepository;
+import traveler.travel.domain.post.entity.File;
+import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
+import traveler.travel.global.exception.BadRequestException;
+import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.jwt.TokenProvider;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,12 +39,43 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private final UserImgRepository userImgRepository;
+
+    private String uploadFolder = "/Users/gimjun-u/Desktop/test";
+
     //일반 회원 가입
     @Transactional
-    public void join(UserDto userDto) {
+    public void join(UserDto userDto, UserImageUpDto userImageUpDto) {
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
-
         userRepository.save(user);
+        saveFile(userImageUpDto);
+    }
+
+    public void saveFile(UserImageUpDto userImageUpDto) {
+        UUID uuid = UUID.randomUUID();
+
+        String storedFileName = uuid + "_" + userImageUpDto.getFile().getOriginalFilename();
+        //수정된 파일 이름 -> 이미지의 고유성 보존을 위해 'UUID_이미지 원래 이름'으로 저장
+        String originFileName = userImageUpDto.getFile().getOriginalFilename();
+        //파일 고유의 원래 이름
+        Path imageFilePath = Paths.get(uploadFolder + "/" + originFileName);
+
+        String profileExtension = userImageUpDto.getFile().getContentType();
+        Long profileSize = userImageUpDto.getFile().getSize();
+
+        try{
+            Files.write(imageFilePath, userImageUpDto.getFile().getBytes());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        File fileImg = userImageUpDto.toEntity(originFileName,
+                storedFileName,
+                profileExtension,
+                profileSize,
+                uploadFolder);
+        userImgRepository.save(fileImg);
     }
 
     public boolean checkEmailDuplicate(String email) {
@@ -97,5 +139,150 @@ public class UserService {
 
         // 토큰 발급
         return tokenDto;
+    }
+
+    //가입된 유저의 전체 정보 출력
+    //관리자만 기능 사용 가능
+    @Transactional
+    public List<UserDto> getAllUserList(UserDto adminInfo){
+        //AdminInfo를 통해서 권한 체크
+//        boolean authMatches = checkAuthority(adminInfo.getEmail());
+
+//        if(authMatches == false){
+//            throw new BadRequestException("J08");
+//        }
+
+        List<User> users = userRepository.findAllByOrderByIdAsc();
+        List<UserDto> userDtoList = new ArrayList<>();
+
+        for( User user : users){
+            UserDto userDto = UserDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .phoneNum(user.getPhoneNum())
+                    .birth(user.getBirth())
+                    .nickname(user.getNickname())
+                    .gender(String.valueOf(user.getGender()))
+                    .build();
+
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
+    }
+
+    //회원 수정
+    //본인만 회원 수정이 가능할 수 있게 조건 추가 필요.
+    @Transactional
+    public void updateUser(Long id, UpdateUserDto userDto, User user){
+
+        User userInfo = findOne(id);
+
+        //남이 내 정보를 못 바꾸게 서비스 구현 필요.
+        //1. {id}를 안받고 요청 보낸 사람의 정보를 바꾸기(방법)
+
+        //로그인한 사람이 본인일 경우에만 메소드 사용 가능.
+        //RefreshToken의 유무로 user의 로그인 확인 가능.
+
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        userInfo.updateUser(userDto.getEmail(),
+                userDto.getPassword(),
+                userDto.getNickname(),
+                userDto.getProfileImg(),
+                userDto.getPhoneNum());
+    }
+
+    //단일 회원 정보 확인 기능
+    //회원 당사자만 기능 사용 가능
+    @Transactional
+    public User getUser(Long id, User userDto){
+        Optional<User> usersWrapper = Optional.ofNullable(findOne(id));
+
+        //비밀번호를 입력해서 본인인증 절차
+//        boolean matches = checkPassword(id, userDto.getPassword());
+//
+//        if(matches == false){
+//            throw new BadRequestException("J06");
+//        }
+
+        User user = usersWrapper.get();
+
+        return User.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .phoneNum(user.getPhoneNum())
+                .birth(user.getBirth())
+                .nickname(user.getNickname())
+                .gender(user.getGender())
+                .authority(user.getAuthority())
+                .build();
+    }
+
+    //user 탈퇴
+    //비밀번호 확인을 통해서 본인 인증
+    @Transactional
+    public User deleteUser(Long id, GetUserAndDeleteDto userDto){
+
+        //이메일을 통해서 db 조회가 필요하다.
+        User user = findOne(id);
+
+        //로그인한 사람이 자신일 경우에만 삭제 가능.
+        //-> 비밀번호 확인을 통해 본인인증 확인.
+        boolean matches = checkPassword(id, userDto.getPassword());
+        if(matches == false){
+            throw new BadRequestException("J06");
+        }
+
+        user.delete();
+        return user;
+    }
+
+    //비밀번호 일치 확인
+    public boolean checkPassword(Long id, String checkUserPassword){
+
+        //db에 있지 않은 id 값
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("L00"));
+
+        String realPassword = user.getPassword();
+        boolean matches = passwordEncoder.matches(checkUserPassword, realPassword);
+        return matches;
+    }
+
+    //회원의 권한 확인
+    //시큐리티 컨피그에서 사용하게끔 수정 필요. -> 로그인을 하고 나서 권한을 admin만 가능하게요... 수정
+    public boolean checkAuthority(String email){
+
+        //email을 통해서 db에서 조회 후, 값이 없다면 exception
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new BadRequestException("L00"));
+
+        //db에서 찾은 권한
+        String adminAuth = String.valueOf(user.getAuthority());
+
+        //만약 받은 권한과 db에서 찾은 권한이 같다면 true, 아니면 false
+        if(adminAuth == "ROLE_ADMIN"){
+            return true;
+        }
+        return false;
+    }
+
+    //user 아이디 찾기
+    public User findOne(Long userId) {
+
+        //아이디가 존재하지 않는 경우
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new BadRequestException("L00"));
+
+        //이미 삭제된 아이디일 경우 true, 삭제가 안된 경우 false
+        boolean matches = user.isDeleted();
+
+        if(matches == true){
+            throw new BadRequestException("J07");
+        }
+
+        return user;
     }
 }

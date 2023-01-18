@@ -40,12 +40,8 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    public void setAuthority(Authority authority){
-        this.authority = authority;
-    }
-
-    public void setPassword(String password){
-        this.password = password;
+    public void updateProfileImg(File file){
+        this.profileImg = file;
     }
 
     public int getAge() {
@@ -76,5 +72,14 @@ public class User extends BaseTimeEntity{
         }
         final User user = (User) o;
         return Objects.equals(id, user.getId());
+    }
+
+    //update하는 메소드
+    public void updateUser(String email, String password, String nickname, File profileImg, String phoneNum){
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.profileImg = profileImg;
+        this.phoneNum = phoneNum;
     }
 }

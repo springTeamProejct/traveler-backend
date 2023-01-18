@@ -1,8 +1,10 @@
 package traveler.travel.global.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import traveler.travel.domain.account.enums.Authority;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -10,7 +12,10 @@ import javax.validation.constraints.Pattern;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class UserDto {
+
+    private Long id;
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
     @Pattern(regexp = "^(?:\\w+\\.?)*\\w+@(?:\\w+\\.)+\\w+$", message = "이메일 형식이 올바르지 않습니다.")
@@ -25,6 +30,8 @@ public class UserDto {
     private String nickname;
 
     private String gender;
+
+    private Authority authority;
 
 
 }
