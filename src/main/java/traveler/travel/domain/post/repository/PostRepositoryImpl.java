@@ -1,6 +1,7 @@
 package traveler.travel.domain.post.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.entity.Post;
+import traveler.travel.domain.post.enums.Category;
 import traveler.travel.global.dto.PostSearchCondition;
 
 import javax.persistence.EntityManager;
@@ -35,6 +37,7 @@ public class PostRepositoryImpl implements PostSearchRepository{
                 .leftJoin(post.travel, travel)
                 .where(
                         notDeleted(),
+                        categoryEq(condition.getCategory()),
                         minAgeGoe(condition.getMinAge()),
                         maxAgeLoe(condition.getMaxAge()),
                         gatherYn(condition.getGatherYn()),
@@ -51,6 +54,7 @@ public class PostRepositoryImpl implements PostSearchRepository{
                 .leftJoin(post.travel, travel)
                 .where(
                         notDeleted(),
+                        categoryEq(condition.getCategory()),
                         minAgeGoe(condition.getMinAge()),
                         maxAgeLoe(condition.getMaxAge()),
                         gatherYn(condition.getGatherYn()),
@@ -61,7 +65,6 @@ public class PostRepositoryImpl implements PostSearchRepository{
 
         return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
     }
-
 
     private BooleanBuilder isSearchable(KeywordType keywordType, String keyword) {
 
@@ -76,6 +79,9 @@ public class PostRepositoryImpl implements PostSearchRepository{
         } else {
             return null;
         }
+    }
+    private BooleanBuilder categoryEq(Category category) {
+        return nullSafeBuilder(() -> post.category.eq(category));
     }
 
     private BooleanBuilder titleCt(String title) {
