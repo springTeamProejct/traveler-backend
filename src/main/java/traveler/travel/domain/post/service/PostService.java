@@ -1,6 +1,8 @@
 package traveler.travel.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.User;
@@ -14,6 +16,7 @@ import traveler.travel.domain.post.repository.LikeRepository;
 import traveler.travel.domain.post.repository.PostRepository;
 import traveler.travel.domain.post.repository.TravelRepository;
 import traveler.travel.global.dto.PostRequestDto;
+import traveler.travel.global.dto.PostSearchCondition;
 import traveler.travel.global.dto.PostUpdateDto;
 import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.ForbiddenException;
@@ -125,6 +128,11 @@ public class PostService {
         }
 
         return post;
+    }
+
+    // 게시글 검색
+    public Page<Post> searchPost(PostSearchCondition condition, Pageable pageable) {
+        return postRepository.search(condition, pageable);
     }
 
     // 유저가 여행 동행 조건을 만족하는지 체크
