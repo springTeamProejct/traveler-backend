@@ -60,6 +60,9 @@ dependencies {
 	// query dsl
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
+
+	// 테스트 코드 용
+	runtimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

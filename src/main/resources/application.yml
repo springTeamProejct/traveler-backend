@@ -8,14 +8,10 @@ server:
       force: true
     
 spring:
-#  mvc:
-#    view:
-#      prefix: /WEB-INF/views/
-#      suffix: .jsp
-  
   profiles:
+    default: local
     include: jwt
-    
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/travel?serverTimezone=Asia/Seoul
