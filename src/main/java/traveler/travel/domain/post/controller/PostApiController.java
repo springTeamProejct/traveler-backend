@@ -2,16 +2,15 @@ package traveler.travel.domain.post.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.domain.account.Login;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.post.entity.Post;
 import traveler.travel.domain.post.service.PostService;
-import traveler.travel.global.dto.PostDetailDto;
-import traveler.travel.global.dto.PostRequestDto;
-import traveler.travel.global.dto.PostUpdateDto;
-import traveler.travel.global.dto.ResponseDto;
+import traveler.travel.global.dto.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,4 +51,17 @@ public class PostApiController {
         return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
     }
 
+    // 게시글 좋아요
+    @PostMapping("/{postId}/like")
+    public ResponseDto<PostDetailDto> likeUpdate(@Login User user, @PathVariable("postId") Long postId) {
+        Post post = postService.updateLike(postId, user);
+        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+    }
+
+    // 게시글 조회, 검색
+    @GetMapping
+    public Page<PostDetailDto> searchPosts(PostSearchCondition condition, Pageable pageable) {
+        Page<Post> posts = postService.searchPost(condition, pageable);
+        return posts.map(p -> new PostDetailDto(p, null));
+    }
 }

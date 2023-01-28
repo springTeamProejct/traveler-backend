@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.enums.Gender;
 import traveler.travel.domain.post.entity.Post;
+import traveler.travel.domain.post.entity.Travel;
 import traveler.travel.domain.post.enums.Category;
 import traveler.travel.domain.post.enums.TravelType;
 
@@ -45,6 +46,18 @@ public class PostRequestDto {
                 .title(title)
                 .content(content)
                 .category(category)
+                .build();
+    }
+
+    public Travel toTravel() {
+        return Travel.builder()
+                .travelType(type)
+                .gender(gender)
+                .minAge(minAge)
+                .maxAge(maxAge)
+                .maxCnt(maxCnt)
+                .location(location)
+                .dateTime(dateTime)
                 .build();
     }
 }

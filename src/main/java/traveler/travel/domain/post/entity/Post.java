@@ -40,6 +40,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany
+    private List<Like> likes = new ArrayList<>();
+
     public void setTravel(Travel travel) {
         this.travel = travel;
     }
@@ -63,5 +66,13 @@ public class Post extends BaseTimeEntity {
         if (title != null) this.title = title;
         if (content != null) this.content = content;
         if (travel != null) this.travel = travel;
+    }
+
+    public void addLike(Like like) {
+        likes.add(like);
+    }
+
+    public void cancelLike(Like like) {
+        likes.remove(like);
     }
 }
