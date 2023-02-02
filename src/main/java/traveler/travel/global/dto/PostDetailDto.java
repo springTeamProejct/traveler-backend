@@ -24,13 +24,12 @@ public class PostDetailDto {
     private Long writerId;
     private String writerName;
     private TravelDto travel;
-    private boolean isMine;
 
     private LocalDateTime createdAt;
 
     private List<CommentResponseDto> comments = new ArrayList<>();
 
-    public PostDetailDto(Post post, User user) {
+    public PostDetailDto(Post post) {
         this.postId = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
@@ -45,12 +44,9 @@ public class PostDetailDto {
             this.travel = new TravelDto(post.getTravel());
         }
 
-        if (user == null) isMine = false;
-        else isMine = writerId.equals(user.getId());
-
         for (Comment comment : post.getComments()) {
             if (comment.getParent() == null) {
-                this.comments.add(new CommentResponseDto(comment, user));
+                this.comments.add(new CommentResponseDto(comment));
             }
         }
 

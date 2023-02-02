@@ -26,14 +26,14 @@ public class PostApiController {
     public ResponseEntity<PostDetailDto> createPost(@Login User user
             , @RequestBody PostRequestDto postDto) {
         Post post = postService.write(postDto, user);
-        return new ResponseEntity<>(new PostDetailDto(post, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(new PostDetailDto(post), HttpStatus.CREATED);
     }
 
     // 게시글 단일 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailDto> findPost(@Login User user, @PathVariable("postId") Long postId) {
+    public ResponseEntity<PostDetailDto> findPost(@PathVariable("postId") Long postId) {
         Post post = postService.view(postId);
-        return ResponseEntity.ok(new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post));
     }
 
     // 게시글 수정
@@ -41,7 +41,7 @@ public class PostApiController {
     public ResponseEntity<PostDetailDto> modifyPost(@Login User user, @PathVariable("postId") Long postId
             , @RequestBody PostUpdateDto postDto) {
         Post post = postService.update(postId, postDto, user);
-        return ResponseEntity.ok(new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post));
     }
 
 
@@ -56,13 +56,13 @@ public class PostApiController {
     @PostMapping("/{postId}/like")
     public ResponseEntity<PostDetailDto> likeUpdate(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.updateLike(postId, user);
-        return ResponseEntity.ok(new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post));
     }
 
     // 게시글 조회, 검색
     @GetMapping
     public ResponseEntity<Page<PostDetailDto>> searchPosts(PostSearchCondition condition, Pageable pageable) {
         Page<Post> posts = postService.searchPost(condition, pageable);
-        return ResponseEntity.ok(posts.map(p -> new PostDetailDto(p, null)));
+        return ResponseEntity.ok(posts.map(PostDetailDto::new));
     }
 }
