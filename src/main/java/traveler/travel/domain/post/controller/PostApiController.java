@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.domain.account.Login;
 import traveler.travel.domain.account.entity.User;
@@ -22,46 +23,46 @@ public class PostApiController {
 
     // 게시글 작성
     @PostMapping("/")
-    public ResponseDto<PostDetailDto> createPost(@Login User user
+    public ResponseEntity<PostDetailDto> createPost(@Login User user
             , @RequestBody PostRequestDto postDto) {
         Post post = postService.write(postDto, user);
-        return new ResponseDto<>(HttpStatus.CREATED.value(), new PostDetailDto(post, user));
+        return new ResponseEntity<>(new PostDetailDto(post, user), HttpStatus.CREATED);
     }
 
     // 게시글 단일 조회
     @GetMapping("/{postId}")
-    public ResponseDto<PostDetailDto> findPost(@Login User user, @PathVariable("postId") Long postId) {
+    public ResponseEntity<PostDetailDto> findPost(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.view(postId);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post, user));
     }
 
     // 게시글 수정
     @PatchMapping("/{postId}")
-    public ResponseDto<PostDetailDto> modifyPost(@Login User user, @PathVariable("postId") Long postId
+    public ResponseEntity<PostDetailDto> modifyPost(@Login User user, @PathVariable("postId") Long postId
             , @RequestBody PostUpdateDto postDto) {
         Post post = postService.update(postId, postDto, user);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post, user));
     }
 
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
-    public ResponseDto<PostDetailDto> deletePost(@Login User user, @PathVariable("postId") Long postId) {
+    public ResponseEntity deletePost(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.delete(postId, user);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+        return ResponseEntity.ok().build();
     }
 
     // 게시글 좋아요
     @PostMapping("/{postId}/like")
-    public ResponseDto<PostDetailDto> likeUpdate(@Login User user, @PathVariable("postId") Long postId) {
+    public ResponseEntity<PostDetailDto> likeUpdate(@Login User user, @PathVariable("postId") Long postId) {
         Post post = postService.updateLike(postId, user);
-        return new ResponseDto<>(HttpStatus.OK.value(), new PostDetailDto(post, user));
+        return ResponseEntity.ok(new PostDetailDto(post, user));
     }
 
     // 게시글 조회, 검색
     @GetMapping
-    public Page<PostDetailDto> searchPosts(PostSearchCondition condition, Pageable pageable) {
+    public ResponseEntity<Page<PostDetailDto>> searchPosts(PostSearchCondition condition, Pageable pageable) {
         Page<Post> posts = postService.searchPost(condition, pageable);
-        return posts.map(p -> new PostDetailDto(p, null));
+        return ResponseEntity.ok(posts.map(p -> new PostDetailDto(p, null)));
     }
 }

@@ -59,6 +59,7 @@ public class PostDetailDto {
     @AllArgsConstructor
     @Getter
     static class TravelDto {
+        private Long travelId;
         private TravelType travelType;
         private Gender travelGender;
         private double xPos;
@@ -76,17 +77,18 @@ public class PostDetailDto {
 
 
         public TravelDto(Travel travel) {
-            this.travelType = travel.getTravelType();
-            this.travelGender = travel.getGender();
-            this.xPos = travel.getXPos();
-            this.yPos = travel.getYPos();
-            this.location = travel.getLocation();
-            this.dateTime = travel.getDateTime();
-            this.minAge = travel.getMinAge();
-            this.maxAge = travel.getMaxAge();
-            this.gatherYn = travel.isGatherYn();
-            this.maxCnt = travel.getMaxCnt();
-            this.nowCnt = travel.getNowCnt();
+            travelId = travel.getId();
+            travelType = travel.getTravelType();
+            travelGender = travel.getGender();
+            xPos = travel.getXPos();
+            yPos = travel.getYPos();
+            location = travel.getLocation();
+            dateTime = travel.getDateTime();
+            minAge = travel.getMinAge();
+            maxAge = travel.getMaxAge();
+            gatherYn = travel.isGatherYn();
+            maxCnt = travel.getMaxCnt();
+            nowCnt = travel.getNowCnt();
         }
     }
 
