@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 
 import javax.persistence.*;
+import javax.validation.constraints.Pattern;
 import java.nio.file.Path;
 
 @Entity

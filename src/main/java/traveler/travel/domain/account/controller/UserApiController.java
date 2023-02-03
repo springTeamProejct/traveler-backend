@@ -138,23 +138,5 @@ public class UserApiController {
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
 
-    @PostMapping(value = "/upload")
-    public ResponseEntity<?> uploadFile(MultipartFile file) throws IOException {
-        String uploadImage = fileService.saveFile(file);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(uploadImage);
-    }
-
-    //다운로드
-    //id값으로 바뀌는게 낫지 않을까?
-    //ex) file/{fileId}
-    @GetMapping(value = "/download/{fileName}")
-    public ResponseEntity<?> downloadFile(@PathVariable("fileName") String fileName) {
-        byte[] downloadImage = fileService.downloadImage(fileName);
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.valueOf("image/jpeg"))
-                .body(downloadImage);
-    }
-
 }
 

@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface UserImgRepository extends JpaRepository<File, Long> {
 
     Optional<File> findByOriginName(String originName);
+
+    Optional<File> findById(Long id);
 }
