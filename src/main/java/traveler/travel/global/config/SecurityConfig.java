@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .authorizeRequests()
 //                .antMatchers("/users/all")
 //                .access("hasRole('ROLE_ADMIN')")    // /users/all 요청에 대해서는 ROLE_ADMIN 권한 필요.
-                .antMatchers("/users/**", "/upload", "/download/**").permitAll()
+                .antMatchers("/users/**").permitAll()
 //                        "/users/login", "/users/signup/**", "/users/reissue", "/users").permitAll()
 //                .antMatchers(HttpMethod.GET,"/users/**").authenticated() // 회원 수정, 회원 탈퇴, 단일 회원 정보 조회 요청에 대해서는 로그인을 요구한다.
 //                .antMatchers(HttpMethod.DELETE, "users/**").authenticated()
