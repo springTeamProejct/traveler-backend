@@ -40,9 +40,6 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    public void updateProfileImg(File file){
-        this.profileImg = file;
-    }
 
     public int getAge() {
         int curYear = LocalDateTime.now().getYear();

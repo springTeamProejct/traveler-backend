@@ -7,11 +7,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
 import traveler.travel.domain.account.repository.UserImgRepository;
-import traveler.travel.domain.post.entity.File;
+import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -19,14 +18,9 @@ import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.jwt.TokenProvider;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,43 +33,13 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final UserImgRepository userImgRepository;
-
-    private String uploadFolder = "/Users/gimjun-u/Desktop/test";
 
     //일반 회원 가입
     @Transactional
-    public void join(UserDto userDto, UserImageUpDto userImageUpDto) {
+    public void join(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
         userRepository.save(user);
-        saveFile(userImageUpDto);
-    }
-
-    public void saveFile(UserImageUpDto userImageUpDto) {
-        UUID uuid = UUID.randomUUID();
-
-        String storedFileName = uuid + "_" + userImageUpDto.getFile().getOriginalFilename();
-        //수정된 파일 이름 -> 이미지의 고유성 보존을 위해 'UUID_이미지 원래 이름'으로 저장
-        String originFileName = userImageUpDto.getFile().getOriginalFilename();
-        //파일 고유의 원래 이름
-        Path imageFilePath = Paths.get(uploadFolder + "/" + originFileName);
-
-        String profileExtension = userImageUpDto.getFile().getContentType();
-        Long profileSize = userImageUpDto.getFile().getSize();
-
-        try{
-            Files.write(imageFilePath, userImageUpDto.getFile().getBytes());
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-        File fileImg = userImageUpDto.toEntity(originFileName,
-                storedFileName,
-                profileExtension,
-                profileSize,
-                uploadFolder);
-        userImgRepository.save(fileImg);
     }
 
     public boolean checkEmailDuplicate(String email) {

@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 
 import javax.persistence.*;
+import java.nio.file.Path;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class File extends BaseTimeEntity {
+public class File extends BaseTimeEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id")
@@ -23,4 +23,23 @@ public class File extends BaseTimeEntity {
     private Long size;
     private String uploadDir; // 저장 경로
     private String extension; // 확장자
+
+    @Lob
+    private byte[] file;
+
+    @Builder
+    public File(String originName
+            , String storedName
+            , Long size
+            , String uploadDir
+            , String extension
+            , byte[] file){
+        this.originName = originName;
+        this.storedName = storedName;
+        this.size = size;
+        this.uploadDir = uploadDir;
+        this.extension = extension;
+        this.file = file;
+    }
+
 }

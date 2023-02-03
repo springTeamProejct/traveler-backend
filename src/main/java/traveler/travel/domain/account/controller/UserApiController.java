@@ -2,13 +2,13 @@ package traveler.travel.domain.account.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.Login;
-import traveler.travel.domain.account.repository.UserImgRepository;
-import traveler.travel.domain.post.entity.File;
+import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
@@ -19,6 +19,7 @@ import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
 import traveler.travel.global.util.RedisUtil;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,16 +35,20 @@ public class UserApiController {
 
     private final UserRepository userRepository;
 
+    private final FileService fileService;
+
 
     //유저 회원가입
     @PostMapping()
-    public ResponseDto<String> save (UserDto user, UserImageUpDto userImageUpDto){
-        Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
+    public ResponseDto<String> save (UserDto user){
+        Optional<User> alreadyUser= userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        userService.join(user, userImageUpDto);
+        userService.join(user);
+
+//        fileService.saveFile(userImageUpDto);
 
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
@@ -132,5 +137,24 @@ public class UserApiController {
         userService.deleteUser(id, userDto);
         return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
     }
+
+    @PostMapping(value = "/upload")
+    public ResponseEntity<?> uploadFile(MultipartFile file) throws IOException {
+        String uploadImage = fileService.saveFile(file);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(uploadImage);
+    }
+
+    //다운로드
+    //id값으로 바뀌는게 낫지 않을까?
+    //ex) file/{fileId}
+    @GetMapping(value = "/download/{fileName}")
+    public ResponseEntity<?> downloadFile(@PathVariable("fileName") String fileName) {
+        byte[] downloadImage = fileService.downloadImage(fileName);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.valueOf("image/jpeg"))
+                .body(downloadImage);
+    }
+
 }
 

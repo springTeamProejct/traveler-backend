@@ -55,6 +55,7 @@ ncp-sms:
   serviceId: ncp:sms:kr:297964575311:traveler
   senderPhoneNum: "01033454223"
 
+# application.yml
 
 # naver cloud sms
 
