@@ -16,6 +16,7 @@ import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.global.exception.BadRequestException;
 import traveler.travel.global.exception.NotFoundException;
+import traveler.travel.global.util.RedisUtil;
 import traveler.travel.jwt.TokenProvider;
 
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
+
+    private final RedisUtil redisUtil;
 
     //일반 회원 가입
     @Transactional
@@ -248,5 +251,36 @@ public class UserService {
         }
 
         return user;
+    }
+
+    // 이메일, 전화번호 인증코드 확인
+    public String checkAuthCode(EmailAndPhoneAuthDto authDto) {
+        String type, code;
+
+        if (authDto.getPhoneNum() == null && authDto.getEmail() != null) {
+            type = "EMAIL";
+        } else if (authDto.getPhoneNum() != null && authDto.getEmail() == null) {
+            type = "PHONE";
+        } else {
+            return "400";
+        }
+
+        if (type.equals("EMAIL")) {
+            code = redisUtil.getValue(authDto.getEmail());
+        } else {
+            code = redisUtil.getValue(authDto.getPhoneNum());
+        }
+
+        // 유효하지 않은 인증번호
+        if (code.isEmpty() || !code.equals(authDto.getCode())) return "J04";
+
+        // 이미 가입된 이메일
+        if (type.equals("EMAIL") && checkEmailDuplicate(authDto.getEmail())) return "J00";
+
+        // 이미 가입된 전화번호
+        else if (type.equals("PHONE") && checkPhoneNumDuplicate(authDto.getPhoneNum())) return "J01";
+
+        // 인증 성공
+        else return "200";
     }
 }

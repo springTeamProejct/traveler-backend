@@ -3,10 +3,8 @@ package traveler.travel.domain.account.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.Login;
 import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
@@ -17,9 +15,7 @@ import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.domain.account.service.MailService;
 import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
-import traveler.travel.global.util.RedisUtil;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +26,6 @@ import java.util.Optional;
 public class UserApiController {
     private final UserService userService;
     private final MailService mailService;
-    private final RedisUtil redisUtil;
     private final SmsService smsService;
 
     private final UserRepository userRepository;
@@ -40,8 +35,8 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
-    public ResponseDto<String> save (UserDto user){
-        Optional<User> alreadyUser= userRepository.findByEmail(user.getEmail());
+    public ResponseEntity save (UserDto user, UserImageUpDto userImageUpDto){
+        Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
@@ -50,7 +45,7 @@ public class UserApiController {
 
 //        fileService.saveFile(userImageUpDto);
 
-        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
+        return ResponseEntity.ok("success");
     }
 
     @PostMapping("/login")
@@ -66,76 +61,72 @@ public class UserApiController {
 
     // 이메일, 전화번호 인증 발송
     @PostMapping("/signup/authcode")
-    public ResponseDto sendAuthCode(@RequestBody EmailAndPhoneAuthDto authDto) throws Exception {
-        if (authDto.getType().equals(EmailAndPhoneAuthDto.Type.EMAIL)) {
-            // 이메일 중복 확인
-            if (userService.checkEmailDuplicate(authDto.getEmail())) {
-                // 이미 가입된 이메일 주소
-                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), null);
-            } else {
-                // 인증 메일 발송
-                String code = mailService.sendAuthMail(authDto.getEmail());
-                return new ResponseDto(HttpStatus.OK.value(), null);
-            }
-        } else if (authDto.getType().equals(EmailAndPhoneAuthDto.Type.PHONE)) {
-            // 전화번호 중복 확인
-            if (userService.checkPhoneNumDuplicate(authDto.getPhoneNum())) {
-                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), null);
-            } else {
-                // 인증 문자 발송
-                SmsService.SmsResponseDto response = smsService.sendAuthCode(authDto.getPhoneNum());
-                return new ResponseDto(HttpStatus.OK.value(), response);
-            }
+    public ResponseEntity sendAuthCode(@RequestBody EmailAndPhoneAuthDto authDto) throws Exception {
 
+        if (authDto.getEmail() != null) {
+
+            // 인증 메일 발송
+            mailService.sendAuthMail(authDto.getEmail());
+            return new ResponseEntity(HttpStatus.OK);
+
+        } else if (authDto.getPhoneNum() != null) {
+
+            // 인증 문자 발송
+            smsService.sendAuthCode(authDto.getPhoneNum());
+            return new ResponseEntity(HttpStatus.OK);
+
+        } else {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), null);
     }
 
     // 인증
     @PostMapping("/signup/authcode/validate")
-    public ResponseDto<String> validateAuthCode(@RequestBody EmailAndPhoneAuthDto authDto) {
-        String value = authDto.getType().equals(EmailAndPhoneAuthDto.Type.EMAIL)? redisUtil.getValue(authDto.getEmail()) : redisUtil.getValue(authDto.getPhoneNum());
-        if (value == null || !value.equals(authDto.getCode())) {
-            // 유효하지 않은 인증번호
-            return new ResponseDto<String>(HttpStatus.BAD_REQUEST.value(), "invalid code");
+    public ResponseEntity<String> validateAuthCode(@RequestBody EmailAndPhoneAuthDto authDto) {
+
+        String result = userService.checkAuthCode(authDto);
+
+        if (result.equals("200")) {
+            return new ResponseEntity<>(HttpStatus.OK);
+
         } else {
-            // 인증 성공
-            return new ResponseDto<String>(HttpStatus.OK.value(), "success");
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
+
     }
 
     //회원 수정
     @PutMapping("/{id}")
-    public ResponseDto<String> updateUser(@Login User user,
+    public ResponseEntity<String> updateUser(@Login User user,
                                             @PathVariable Long id,
                                           @RequestBody UpdateUserDto userDto){
         userService.updateUser(id, userDto, user);
 
         //본인은 본인 정보만 수정 가능 -> Login한 사람이 로그인
 
-        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
+        return ResponseEntity.ok(("Success"));
     }
 
 
     //단일 회원 정보 확인 기능
     @GetMapping("/{id}")
-    public User getUser(@Login User user,
+    public ResponseEntity<User> getUser(@Login User user,
                            @PathVariable Long id){
-        return userService.getUser(id, user);
+        return ResponseEntity.ok(userService.getUser(id, user));
     }
 
     //전체 회원 리스트
     @GetMapping("/all")
-    public List<UserDto> list(@RequestBody UserDto userDto){
-        return userService.getAllUserList(userDto);
+    public ResponseEntity<List<UserDto>> list(@RequestBody UserDto userDto){
+        return ResponseEntity.ok(userService.getAllUserList(userDto));
     }
 
     //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)
     @DeleteMapping("/{id}")
-    public ResponseDto<String> deleteUser(@PathVariable Long id,
+    public ResponseEntity<String> deleteUser(@PathVariable Long id,
                                           @RequestBody GetUserAndDeleteDto userDto){
         userService.deleteUser(id, userDto);
-        return new ResponseDto<String>(HttpStatus.OK.value(), "Success");
+        return ResponseEntity.ok("Success");
     }
 
 }
