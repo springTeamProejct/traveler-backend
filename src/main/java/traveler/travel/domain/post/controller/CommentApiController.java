@@ -30,7 +30,7 @@ public class CommentApiController {
         Post post = postService.findOne(commentDto.getPostId());
         Comment comment = commentService.addComment(commentDto, user, post);
 
-        return new ResponseEntity<>(new CommentResponseDto(comment, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CommentResponseDto(comment), HttpStatus.CREATED);
     }
 
     // 댓글 수정
@@ -39,7 +39,7 @@ public class CommentApiController {
         String content = commentMap.get("content");
         Comment comment = commentService.modifyComment(commentId, content, user);
 
-        return ResponseEntity.ok(new CommentResponseDto(comment, user));
+        return ResponseEntity.ok(new CommentResponseDto(comment));
     }
 
     // 댓글 삭제
@@ -47,7 +47,7 @@ public class CommentApiController {
     public ResponseEntity<CommentResponseDto> deleteComment(@Login User user, @PathVariable Long commentId) {
         Comment comment = commentService.deleteComment(commentId, user);
 
-        return ResponseEntity.ok(new CommentResponseDto(comment, user));
+        return ResponseEntity.ok(new CommentResponseDto(comment));
     }
 
 }
