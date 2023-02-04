@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import traveler.travel.domain.account.Login;
+import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
@@ -14,7 +15,6 @@ import traveler.travel.domain.account.repository.UserRepository;
 import traveler.travel.domain.account.service.MailService;
 import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
-import traveler.travel.global.util.RedisUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +30,8 @@ public class UserApiController {
 
     private final UserRepository userRepository;
 
+    private final FileService fileService;
+
 
     //유저 회원가입
     @PostMapping()
@@ -39,7 +41,9 @@ public class UserApiController {
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        userService.join(user, userImageUpDto);
+        userService.join(user);
+
+//        fileService.saveFile(userImageUpDto);
 
         return ResponseEntity.ok("success");
     }
@@ -124,5 +128,6 @@ public class UserApiController {
         userService.deleteUser(id, userDto);
         return ResponseEntity.ok("Success");
     }
+
 }
 
