@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import traveler.travel.global.dto.ResponseDto;
-import traveler.travel.global.exception.EmailDuplicateException;
-import traveler.travel.global.exception.ErrorCode;
-import traveler.travel.global.exception.ErrorResponse;
 
 @ControllerAdvice
 @RestControllerAdvice
@@ -25,17 +22,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseDto handleBadRequestException(BadRequestException e) {
-        return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), e.getErrorCode());
+        return new ResponseDto<>(e.getErrorCode());
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseDto handleNotFoundException(NotFoundException e) {
-        return new ResponseDto<>(HttpStatus.NOT_FOUND.value(), e.getErrorCode());
+        return new ResponseDto<>(e.getErrorCode());
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseDto handleForbiddenException(ForbiddenException e) {
-        return new ResponseDto<>(HttpStatus.FORBIDDEN.value(), e.getErrorCode());
+        return new ResponseDto<>(e.getErrorCode());
     }
 
     @ExceptionHandler(value = Exception.class)

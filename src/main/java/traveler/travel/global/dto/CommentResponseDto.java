@@ -18,21 +18,17 @@ public class CommentResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
     private boolean isDeleted;
-    private boolean isMine;
 
     private List<CommentResponseDto> children = new ArrayList<>();
-    public CommentResponseDto(Comment comment, User user) {
+    public CommentResponseDto(Comment comment) {
         this.writerId = comment.getWriter().getId();
         this.writerName = comment.getWriter().getNickname();
         this.content = comment.getContent();
         this.createdAt = comment.getCreatedAt();
         this.isDeleted = comment.isDeleted();
 
-        if (user == null) isMine = false;
-        else isMine = writerId.equals(user.getId());
-
         for (Comment child : comment.getChildren()) {
-            this.children.add(new CommentResponseDto(child, user));
+            this.children.add(new CommentResponseDto(child));
         }
     }
 
