@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
-import traveler.travel.domain.account.repository.UserImgRepository;
-import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -111,13 +109,9 @@ public class UserService {
     //가입된 유저의 전체 정보 출력
     //관리자만 기능 사용 가능
     @Transactional
-    public List<UserDto> getAllUserList(UserDto adminInfo){
+    public List<UserDto> getAllUserList(User adminInfo){
         //AdminInfo를 통해서 권한 체크
-//        boolean authMatches = checkAuthority(adminInfo.getEmail());
-
-//        if(authMatches == false){
-//            throw new BadRequestException("J08");
-//        }
+        checkAuthority(adminInfo.getId());
 
         List<User> users = userRepository.findAllByOrderByIdAsc();
         List<UserDto> userDtoList = new ArrayList<>();
@@ -147,9 +141,6 @@ public class UserService {
 
         //남이 내 정보를 못 바꾸게 서비스 구현 필요.
         //1. {id}를 안받고 요청 보낸 사람의 정보를 바꾸기(방법)
-
-        //로그인한 사람이 본인일 경우에만 메소드 사용 가능.
-        //RefreshToken의 유무로 user의 로그인 확인 가능.
 
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
@@ -220,20 +211,18 @@ public class UserService {
 
     //회원의 권한 확인
     //시큐리티 컨피그에서 사용하게끔 수정 필요. -> 로그인을 하고 나서 권한을 admin만 가능하게요... 수정
-    public boolean checkAuthority(String email){
+    public void checkAuthority(Long userId){
 
         //email을 통해서 db에서 조회 후, 값이 없다면 exception
-        User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new BadRequestException("L00"));
+        User user = findOne(userId);
 
         //db에서 찾은 권한
         String adminAuth = String.valueOf(user.getAuthority());
 
         //만약 받은 권한과 db에서 찾은 권한이 같다면 true, 아니면 false
-        if(adminAuth == "ROLE_ADMIN"){
-            return true;
+        if(adminAuth != "ROLE_ADMIN"){
+            throw new BadRequestException("J08");
         }
-        return false;
     }
 
     //user 아이디 찾기
