@@ -135,19 +135,18 @@ public class UserService {
     //회원 수정
     //본인만 회원 수정이 가능할 수 있게 조건 추가 필요.
     @Transactional
-    public void updateUser(Long id, UpdateUserDto userDto, User user){
-
-        User userInfo = findOne(id);
+    public void updateUser(Long userId, UpdateUserDto userDto, User user){
 
         //남이 내 정보를 못 바꾸게 서비스 구현 필요.
-        //1. {id}를 안받고 요청 보낸 사람의 정보를 바꾸기(방법)
+        // > 수정하려는 내용은 본인만 접근 가능.
+        checkSelf(user, userId);
+        User userInfo = findOne(userId);
 
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         userInfo.updateUser(userDto.getEmail(),
                 userDto.getPassword(),
                 userDto.getNickname(),
-                userDto.getProfileImg(),
                 userDto.getPhoneNum());
     }
 
@@ -240,6 +239,13 @@ public class UserService {
         }
 
         return user;
+    }
+
+    //로그인한 유저가 본인인지 확인하기.
+    public void checkSelf(User user, Long userId){
+        if(user.getId() != userId){
+            throw new BadRequestException("J08");
+        };
     }
 
     // 이메일, 전화번호 인증코드 확인

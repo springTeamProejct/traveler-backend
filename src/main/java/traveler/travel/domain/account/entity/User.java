@@ -72,11 +72,13 @@ public class User extends BaseTimeEntity{
     }
 
     //update하는 메소드
-    public void updateUser(String email, String password, String nickname, File profileImg, String phoneNum){
+    public void updateUser(String email,
+                           String password,
+                           String nickname,
+                           String phoneNum){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.profileImg = profileImg;
         this.phoneNum = phoneNum;
     }
 }

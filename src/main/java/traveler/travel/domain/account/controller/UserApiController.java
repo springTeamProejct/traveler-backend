@@ -97,8 +97,6 @@ public class UserApiController {
                                           @RequestBody UpdateUserDto userDto){
         userService.updateUser(id, userDto, user);
 
-        //본인은 본인 정보만 수정 가능 -> Login한 사람이 로그인
-
         return ResponseEntity.ok(("Success"));
     }
 

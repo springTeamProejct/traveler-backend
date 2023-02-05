@@ -3,7 +3,6 @@ package traveler.travel.global.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import traveler.travel.domain.post.entity.File;
 
 @Getter
 @AllArgsConstructor
@@ -16,7 +15,6 @@ public class UpdateUserDto {
     String password;
     String nickname;
     String phoneNum;
-    File profileImg;
 
     public void setPassword(String password){
         this.password = password;
