@@ -30,9 +30,6 @@ public class UserApiController {
 
     private final UserRepository userRepository;
 
-    private final FileService fileService;
-
-
     //유저 회원가입
     @PostMapping()
     public ResponseEntity save (UserDto user, UserImageUpDto userImageUpDto){
@@ -42,8 +39,6 @@ public class UserApiController {
         }
 
         userService.join(user);
-
-//        fileService.saveFile(userImageUpDto);
 
         return ResponseEntity.ok("success");
     }
@@ -117,8 +112,8 @@ public class UserApiController {
 
     //전체 회원 리스트
     @GetMapping("/all")
-    public ResponseEntity<List<UserDto>> list(@RequestBody UserDto userDto){
-        return ResponseEntity.ok(userService.getAllUserList(userDto));
+    public ResponseEntity<List<UserDto>> list(@Login User user){
+        return ResponseEntity.ok(userService.getAllUserList(user));
     }
 
     //회원 삭제(회원 basetime entity가 메소드가 실행된 시간으로 Update)
