@@ -23,19 +23,15 @@ public class FileApiController {
 
     @PostMapping(value = "/upload")
     public ResponseEntity<?> uploadFile(MultipartFile file) throws IOException {
-        String uploadImage = fileService.saveFile(file);
+        String uploadImage = fileService.uploadImageToFileSystem(file);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(uploadImage);
     }
-
-
-    //다운로드
-    //id를 통해서 일치하는 내용의 파일을 찾기.
     @GetMapping(value = "/download/{fileId}")
-    public ResponseEntity<?> downloadFile(@PathVariable("fileId") Long fileId) {
-        byte[] downloadImage = fileService.downloadImage(fileId);
+    public ResponseEntity<?> downloadFile(@PathVariable("fileId") Long fileId) throws IOException {
+        byte[] downloadImg = fileService.downloadImgFromFileSystem(fileId);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf("image/jpeg"))
-                .body(downloadImage);
+                .body(downloadImg);
     }
 }
