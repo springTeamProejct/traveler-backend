@@ -2,6 +2,7 @@ package traveler.travel.domain.file.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.repository.UserImgRepository;
@@ -20,7 +21,8 @@ import java.util.UUID;
 public class FileService {
     private final UserImgRepository userImgRepository;
 
-    private final String FOLDER_PATH = "/Users/gimjun-u/Desktop/test/temp/";
+    @Value("${file.path}")
+    private String FOLDER_PATH;
 
     //file 아이디 찾기
     public File findOne(Long fileId) {
@@ -72,7 +74,7 @@ public class FileService {
         file.transferTo(new java.io.File(filePath));
 
         if(fileData != null){
-            return "file uploaded successfully! filePath : " + filePath;
+            return "Success";
         }
         return null;
     }
