@@ -10,6 +10,8 @@ import traveler.travel.global.exception.BadRequestException;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -18,7 +20,7 @@ import java.util.UUID;
 public class FileService {
     private final UserImgRepository userImgRepository;
 
-    private final String FOLDER_PATH = "/Users/gimjun-u/Desktop/test/";
+    private final String FOLDER_PATH = "/Users/gimjun-u/Desktop/test/temp/";
 
     //file 아이디 찾기
     public File findOne(Long fileId) {
@@ -38,14 +40,20 @@ public class FileService {
     }
 
     public String uploadImageToFileSystem(MultipartFile file) throws IOException {
-        String filePath = FOLDER_PATH + file.getOriginalFilename();
+
         UUID uuid = UUID.randomUUID();
 
         //파일 고유의 원래 이름
         String originFileName = file.getOriginalFilename();
 
-        //수정된 파일 이름 -> 이미지의 고유성 보존을 위해 'UUID_이미지 원래 이름'으로 저장
-        String storedFileName = uuid + "_" + originFileName;
+        String newFileName = createName();
+        log.info("newFileName : " + newFileName);
+
+        //수정된 파일 이름 -> 이미지의 고유성 보존을 위해 'UUID_이미지 원래 이름'으로 저장해야 하지만
+        //db에 등록된 파일은 수정된 이름으로 uuid+_+db에 등록된 날짜 로 등록.
+        String storedFileName = uuid + "_" + newFileName;
+
+        String filePath = FOLDER_PATH + storedFileName;
 
         String profileExtension = file.getContentType();
 
@@ -64,10 +72,11 @@ public class FileService {
         file.transferTo(new java.io.File(filePath));
 
         if(fileData != null){
-            return "file uploaded successfully! filePath :" +filePath;
+            return "file uploaded successfully! filePath : " + filePath;
         }
         return null;
     }
+
 
     public byte[] downloadImgFromFileSystem(Long fileId) throws IOException{
 
@@ -76,5 +85,19 @@ public class FileService {
         String filePath = file.getUploadDir();
 
         return Files.readAllBytes(new java.io.File(filePath).toPath());
+    }
+
+    //폴더, 파일 이름을 실행한 날짜 이름으로 바꾸는 기능
+    private String createName(){
+        //날짜
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+
+        //ex)저장할 폴더 이름을 20220210 이런 식으로 변환
+        String str = sdf.format(date);
+
+//        String newName = str.replace("-", java.io.File.separator);
+
+        return str;
     }
 }
