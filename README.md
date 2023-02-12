@@ -65,6 +65,6 @@ control + r
 - application.yml 파일 생성 후 
 ```yml
   file:
-  path: 
-    # 로컬 작업 환경에 맞게 변경
+   path: 
+      # 로컬 작업 환경에 맞게 변경
 ```
