@@ -1,6 +1,7 @@
 package traveler.travel.domain.account.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -135,47 +137,50 @@ public class UserService {
     //회원 수정
     //본인만 회원 수정이 가능할 수 있게 조건 추가 필요.
     @Transactional
-    public void updateUser(Long id, UpdateUserDto userDto, User user){
-
-        User userInfo = findOne(id);
+    public void updateUser(Long userId, UpdateUserDto userDto, User user){
 
         //남이 내 정보를 못 바꾸게 서비스 구현 필요.
-        //1. {id}를 안받고 요청 보낸 사람의 정보를 바꾸기(방법)
+        // > 수정하려는 내용은 본인만 접근 가능.
+        checkSelf(user, userId);
+        User userInfo = findOne(userId);
 
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         userInfo.updateUser(userDto.getEmail(),
                 userDto.getPassword(),
                 userDto.getNickname(),
-                userDto.getProfileImg(),
                 userDto.getPhoneNum());
     }
 
     //단일 회원 정보 확인 기능
-    //회원 당사자만 기능 사용 가능
     @Transactional
-    public User getUser(Long id, User userDto){
-        Optional<User> usersWrapper = Optional.ofNullable(findOne(id));
+    public User getUser(Long userId, User userDto){
 
-        //비밀번호를 입력해서 본인인증 절차
-//        boolean matches = checkPassword(id, userDto.getPassword());
-//
-//        if(matches == false){
-//            throw new BadRequestException("J06");
-//        }
+        Optional<User> usersWrapper = Optional.ofNullable(findOne(userId));
 
-        User user = usersWrapper.get();
+        //접근하는 대상자가 다른 사람일 경우 닉네임과 성별만 조회 가능.
+        boolean notMe = checkSelf(userDto, userId);
+        if(notMe == false){
+            User user = usersWrapper.get();
 
-        return User.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .phoneNum(user.getPhoneNum())
-                .birth(user.getBirth())
-                .nickname(user.getNickname())
-                .gender(user.getGender())
-                .authority(user.getAuthority())
-                .build();
+            return User.builder()
+                    .nickname(user.getNickname())
+                    .gender(user.getGender())
+                    .build();
+        }
+
+            User user = usersWrapper.get();
+
+            return User.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .password(user.getPassword())
+                    .phoneNum(user.getPhoneNum())
+                    .birth(user.getBirth())
+                    .nickname(user.getNickname())
+                    .gender(user.getGender())
+                    .authority(user.getAuthority())
+                    .build();
     }
 
     //user 탈퇴
@@ -240,6 +245,15 @@ public class UserService {
         }
 
         return user;
+    }
+
+    //로그인한 유저가 본인인지 확인하기.
+    public boolean checkSelf(User user, Long userId){
+        if(user.getId() != userId){
+            //본인이 아니라면 return 하는 값이 false
+            return false;
+        };
+        return true;
     }
 
     // 이메일, 전화번호 인증코드 확인
