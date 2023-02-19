@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserImgRepository;
 import traveler.travel.domain.post.entity.File;
 import traveler.travel.global.exception.BadRequestException;
@@ -41,6 +42,23 @@ public class FileService {
         return file;
     }
 
+    //file의 originName으로 찾기
+    public File findOneOriginName(String originName) {
+
+        //파일이 존재하지 않는 경우
+        File file = userImgRepository.findByOriginName(originName).orElseThrow(() ->
+                new BadRequestException("L00"));
+
+        //이미 삭제된 파일일 경우 true, 삭제가 안된 경우 false
+        boolean matches = file.isDeleted();
+
+        if(matches == true){
+            throw new BadRequestException("J07");
+        }
+
+        return file;
+    }
+
     public String uploadImageToFileSystem(MultipartFile file) throws IOException {
 
         UUID uuid = UUID.randomUUID();
@@ -49,15 +67,13 @@ public class FileService {
         String originFileName = file.getOriginalFilename();
 
         String newFileName = createName();
-        log.info("newFileName : " + newFileName);
 
-        //수정된 파일 이름 -> 이미지의 고유성 보존을 위해 'UUID_이미지 원래 이름'으로 저장해야 하지만
-        //db에 등록된 파일은 수정된 이름으로 uuid+_+db에 등록된 날짜 로 등록.
+        String profileExtension = file.getContentType();
+
+        //변경된이름.확장자 형태로 변경이 필요.
         String storedFileName = uuid + "_" + newFileName;
 
         String filePath = FOLDER_PATH + storedFileName;
-
-        String profileExtension = file.getContentType();
 
         Long profileSize = file.getSize();
 
@@ -71,6 +87,12 @@ public class FileService {
                         .build()
         );
 
+        //저장된 fileId를 user의 file_id에 넣어주기
+//        File fileInfo = findOne(fileData.getId());
+//
+//        user.setProfileImg(fileInfo);
+//        log.info(String.valueOf(user.getProfileImg()));
+
         file.transferTo(new java.io.File(filePath));
 
         if(fileData != null){
@@ -78,7 +100,6 @@ public class FileService {
         }
         return null;
     }
-
 
     public byte[] downloadImgFromFileSystem(Long fileId) throws IOException{
 

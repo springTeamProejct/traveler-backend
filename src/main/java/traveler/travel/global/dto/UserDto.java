@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import traveler.travel.domain.account.enums.Authority;
+import traveler.travel.domain.post.entity.File;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -33,5 +34,6 @@ public class UserDto {
 
     private Authority authority;
 
+    private File profileImg;
 
 }

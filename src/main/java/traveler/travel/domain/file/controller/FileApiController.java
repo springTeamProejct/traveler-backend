@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import traveler.travel.domain.account.Login;
+import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.file.service.FileService;
 
 import java.io.IOException;
@@ -22,7 +24,9 @@ public class FileApiController {
     private final FileService fileService;
 
     @PostMapping(value = "/upload")
-    public ResponseEntity<?> uploadFile(MultipartFile file) throws IOException {
+    public ResponseEntity<?> uploadFile(
+//             User user,
+                                        MultipartFile file) throws IOException {
         String uploadImage = fileService.uploadImageToFileSystem(file);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(uploadImage);

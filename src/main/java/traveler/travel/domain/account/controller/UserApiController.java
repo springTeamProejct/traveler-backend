@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.Login;
-import traveler.travel.domain.file.service.FileService;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.global.exception.EmailDuplicateException;
@@ -16,6 +16,7 @@ import traveler.travel.domain.account.service.MailService;
 import traveler.travel.domain.account.service.SmsService;
 import traveler.travel.domain.account.service.UserService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,13 +33,14 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
-    public ResponseEntity save (UserDto user, UserImageUpDto userImageUpDto){
+    public ResponseEntity save (UserDto user, MultipartFile file) throws IOException {
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        userService.join(user);
+        userService.join(user, file);
+        //api 형식? 노션페이지
 
         return ResponseEntity.ok("success");
     }

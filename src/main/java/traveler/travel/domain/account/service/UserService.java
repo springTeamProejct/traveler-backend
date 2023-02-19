@@ -8,8 +8,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
+import traveler.travel.domain.file.service.FileService;
+import traveler.travel.domain.post.entity.File;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -18,6 +21,7 @@ import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.global.util.RedisUtil;
 import traveler.travel.jwt.TokenProvider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,15 +38,37 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-
     private final RedisUtil redisUtil;
+
+    private final FileService fileService;
 
     //일반 회원 가입
     @Transactional
-    public void join(UserDto userDto) {
+    public void join(UserDto userDto, MultipartFile file) throws IOException {
+        //1.프로필 사진은 모두 같은 이미지로 통일
+        //-> 나중에 수정을 하고 싶을 경우 따로 수정.
+
+        //2. 처음부터 새로운 프로필 사진으로 등록
+
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
         userRepository.save(user);
+        //회원가입한 user라는 정보에 file_id를 고정된 값(data에 기본 이미지)을 넣는다.
+
+        //file을 저장한 유저값에 넣어줘야되는데 File_id를 만들어놔야되는데.
+        //먼저 저장해서 db에 파일을 넣어놓고.
+
+        //getOriginName에 "기본이미지"라는 파일을 찾아서 우선 입력
+        fileService.uploadImageToFileSystem(file);
+
+        //db에서 user값을 찾아서 setProfileImg를 통해서 fileId를 저장하기.
+        String userEmail = user.getEmail();
+        User userInfo = findOneEmail(userEmail);
+
+        File fileInfo = fileService.findOneOriginName(file.getOriginalFilename());
+
+        userInfo.setProfileImg(fileInfo);
+
     }
 
     public boolean checkEmailDuplicate(String email) {
@@ -247,6 +273,23 @@ public class UserService {
         return user;
     }
 
+    //email로 유저 정보 찾기
+    public User findOneEmail(String userEmail) {
+
+        //아이디가 존재하지 않는 경우
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() ->
+                new BadRequestException("L00"));
+
+        //이미 삭제된 아이디일 경우 true, 삭제가 안된 경우 false
+        boolean matches = user.isDeleted();
+
+        if(matches == true){
+            throw new BadRequestException("J07");
+        }
+
+        return user;
+    }
+
     //로그인한 유저가 본인인지 확인하기.
     public boolean checkSelf(User user, Long userId){
         if(user.getId() != userId){
@@ -286,4 +329,20 @@ public class UserService {
         // 인증 성공
         else return "200";
     }
+
+//    @Transactional
+//    public List<CommentRequestDto> getAllUserCommentList(User adminInfo){
+//        //1.
+//        List<Comment> comments = commentRepository.findAllByOrderByCommentIdAsc();
+//        List<CommentRequestDto> userDtoList = new ArrayList<>();
+//
+//        for( Comment : comments){
+//            CommentRequestDto commentDto = CommentRequestDto.builder()
+//                    .comment(commentDto.getContent())
+//                    .build();
+//
+//            userDtoList.add(userDto);
+//        }
+//        return userDtoList;
+//    }
 }
