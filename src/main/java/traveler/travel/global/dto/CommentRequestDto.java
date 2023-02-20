@@ -1,6 +1,7 @@
 package traveler.travel.global.dto;
 
 import lombok.*;
+import traveler.travel.domain.post.entity.Comment;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -14,4 +15,5 @@ public class CommentRequestDto {
     private Long parentId;
     @NotBlank
     private String content;
+
 }

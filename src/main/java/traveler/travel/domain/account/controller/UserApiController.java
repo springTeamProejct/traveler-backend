@@ -124,5 +124,12 @@ public class UserApiController {
         return ResponseEntity.ok("Success");
     }
 
+    //본인이 작성한 댓글 보여주기
+//    @GetMapping("/users/{userId}/comments")
+//    public ResponseEntity<String> viewMyComments(@PathVariable Long userId){
+//        userService.getAllUserCommentList(userId);
+//        return null;
+//    }
+
 }
 

@@ -12,7 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
 import traveler.travel.domain.file.service.FileService;
+import traveler.travel.domain.post.entity.Comment;
 import traveler.travel.domain.post.entity.File;
+import traveler.travel.domain.post.repository.CommentRepository;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -38,9 +40,8 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final RedisUtil redisUtil;
-
     private final FileService fileService;
+    private final RedisUtil redisUtil;
 
     //일반 회원 가입
     @Transactional
@@ -53,15 +54,15 @@ public class UserService {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
         userRepository.save(user);
-        //회원가입한 user라는 정보에 file_id를 고정된 값(data에 기본 이미지)을 넣는다.
-
-        //file을 저장한 유저값에 넣어줘야되는데 File_id를 만들어놔야되는데.
-        //먼저 저장해서 db에 파일을 넣어놓고.
-
-        //getOriginName에 "기본이미지"라는 파일을 찾아서 우선 입력
+//        //회원가입한 user라는 정보에 file_id를 고정된 값(data에 기본 이미지)을 넣는다.
+//
+//        //file을 저장한 유저값에 넣어줘야되는데 File_id를 만들어놔야되는데.
+//        //먼저 저장해서 db에 파일을 넣어놓고.
+//
+//        //getOriginName에 "기본이미지"라는 파일을 찾아서 우선 입력
         fileService.uploadImageToFileSystem(file);
-
-        //db에서 user값을 찾아서 setProfileImg를 통해서 fileId를 저장하기.
+//
+//        //db에서 user값을 찾아서 setProfileImg를 통해서 fileId를 저장하기.
         String userEmail = user.getEmail();
         User userInfo = findOneEmail(userEmail);
 
@@ -331,18 +332,19 @@ public class UserService {
     }
 
 //    @Transactional
-//    public List<CommentRequestDto> getAllUserCommentList(User adminInfo){
-//        //1.
-//        List<Comment> comments = commentRepository.findAllByOrderByCommentIdAsc();
-//        List<CommentRequestDto> userDtoList = new ArrayList<>();
-//
-//        for( Comment : comments){
-//            CommentRequestDto commentDto = CommentRequestDto.builder()
-//                    .comment(commentDto.getContent())
-//                    .build();
-//
-//            userDtoList.add(userDto);
-//        }
-//        return userDtoList;
+//    public List<CommentRequestDto> getAllUserCommentList(Long userId){
+////        //1.
+////        List<Comment> comments = commentRepository.findAllByOrderByCommentIdAsc();
+////        List<CommentRequestDto> userDtoList = new ArrayList<>();
+////
+////        for( Comment : comments){
+////            CommentRequestDto commentDto = CommentRequestDto.builder()
+////                    .comment(commentDto.getContent())
+////                    .build();
+////
+////            userDtoList.add(userDto);
+////        }
+////        return userDtoList;
+//    return null;
 //    }
 }

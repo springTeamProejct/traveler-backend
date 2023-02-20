@@ -24,10 +24,9 @@ public class FileApiController {
     private final FileService fileService;
 
     @PostMapping(value = "/upload")
-    public ResponseEntity<?> uploadFile(
-//             User user,
-                                        MultipartFile file) throws IOException {
+    public ResponseEntity<?> uploadFile(@Login User user, MultipartFile file) throws IOException {
         String uploadImage = fileService.uploadImageToFileSystem(file);
+        fileService.updateProfileImg(user, file);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(uploadImage);
     }

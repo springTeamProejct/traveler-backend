@@ -25,7 +25,7 @@ public class File extends BaseTimeEntity{
     private String uploadDir; // 저장 경로
     private String extension; // 확장자
 
-    @OneToOne
+    @OneToOne(mappedBy = "profileImg")
     private User user;
 
     @Builder
