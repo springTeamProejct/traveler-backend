@@ -105,9 +105,11 @@ public class UserApiController {
 
     //단일 회원 정보 확인 기능
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@Login User user,
+    public ResponseEntity<UserResponseDto> getUser(@Login User user,
                            @PathVariable Long id){
-        return ResponseEntity.ok(userService.getUser(id, user));
+
+        return ResponseEntity.ok(new UserResponseDto(
+                userService.getUser(id), user.getId().equals(id)));
     }
 
     //전체 회원 리스트
