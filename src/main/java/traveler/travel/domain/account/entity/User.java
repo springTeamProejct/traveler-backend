@@ -1,6 +1,7 @@
 package traveler.travel.domain.account.entity;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.enums.AccountType;
@@ -30,7 +31,8 @@ public class User extends BaseTimeEntity{
     private String birth;
     private String nickname;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_file_id")
     private File profileImg;
 
     @Enumerated(EnumType.STRING)
@@ -40,6 +42,9 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    public void setProfileImg(File profileImg){
+        this.profileImg = profileImg;
+    }
 
     public int getAge() {
         int curYear = LocalDateTime.now().getYear();
