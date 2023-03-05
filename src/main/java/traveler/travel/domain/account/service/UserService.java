@@ -21,6 +21,7 @@ import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.global.util.RedisUtil;
 import traveler.travel.jwt.TokenProvider;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,36 +38,14 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final FileService fileService;
     private final RedisUtil redisUtil;
 
     //일반 회원 가입
     @Transactional
-    public void join(UserDto userDto, MultipartFile file) throws IOException {
-        //1.프로필 사진은 모두 같은 이미지로 통일
-        //-> 나중에 수정을 하고 싶을 경우 따로 수정.
-
-        //2. 처음부터 새로운 프로필 사진으로 등록
-
+    public void join(UserDto userDto) throws IOException {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = User.build(userDto);
         userRepository.save(user);
-//        //회원가입한 user라는 정보에 file_id를 고정된 값(data에 기본 이미지)을 넣는다.
-//
-//        //file을 저장한 유저값에 넣어줘야되는데 File_id를 만들어놔야되는데.
-//        //먼저 저장해서 db에 파일을 넣어놓고.
-//
-//        //getOriginName에 "기본이미지"라는 파일을 찾아서 우선 입력
-        fileService.uploadImageToFileSystem(file);
-//
-//        //db에서 user값을 찾아서 setProfileImg를 통해서 fileId를 저장하기.
-        String userEmail = user.getEmail();
-        User userInfo = findOneEmail(userEmail);
-
-        File fileInfo = fileService.findOneOriginName(file.getOriginalFilename());
-
-        userInfo.setProfileImg(fileInfo);
-
     }
 
     public boolean checkEmailDuplicate(String email) {
