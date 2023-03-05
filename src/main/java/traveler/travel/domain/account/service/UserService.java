@@ -12,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
 import traveler.travel.domain.file.service.FileService;
-import traveler.travel.domain.post.entity.Comment;
 import traveler.travel.domain.post.entity.File;
-import traveler.travel.domain.post.repository.CommentRepository;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -27,7 +25,6 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -160,33 +157,10 @@ public class UserService {
 
     //단일 회원 정보 확인 기능
     @Transactional
-    public User getUser(Long userId, User userDto){
+    public User getUser(Long userId){
+        return userRepository.findById(userId).filter(u -> !u.isDeleted())
+                .orElseThrow(() -> new NotFoundException("F03"));
 
-        Optional<User> usersWrapper = Optional.ofNullable(findOne(userId));
-
-        //접근하는 대상자가 다른 사람일 경우 닉네임과 성별만 조회 가능.
-        boolean notMe = checkSelf(userDto, userId);
-        if(notMe == false){
-            User user = usersWrapper.get();
-
-            return User.builder()
-                    .nickname(user.getNickname())
-                    .gender(user.getGender())
-                    .build();
-        }
-
-            User user = usersWrapper.get();
-
-            return User.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .password(user.getPassword())
-                    .phoneNum(user.getPhoneNum())
-                    .birth(user.getBirth())
-                    .nickname(user.getNickname())
-                    .gender(user.getGender())
-                    .authority(user.getAuthority())
-                    .build();
     }
 
     //user 탈퇴

@@ -98,11 +98,8 @@ public class FileService {
                         .build()
         );
 
-        //저장된 fileId를 user의 file_id에 넣어주기
         File fileInfo = findOne(fileData.getId());
-
         user.setFile(fileInfo);
-
         userRepository.save(user);
 
         file.transferTo(new java.io.File(filePath));

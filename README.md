@@ -59,3 +59,12 @@ redis:7.0.5
 
 ## intellij를 사용한 spring 실행
 control + r
+
+## application.yml에서 변경해야되는 사항
+- intelliJ 안에서 main repository안에 resources repository 생성
+- application.yml 파일 생성 후 
+```yml
+  file:
+   path: 
+      # 로컬 작업 환경에 맞게 변경
+```
