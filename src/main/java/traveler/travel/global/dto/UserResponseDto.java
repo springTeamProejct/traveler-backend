@@ -16,7 +16,7 @@ public class UserResponseDto {
     public UserResponseDto(User user, boolean open) {
         this.nickname = user.getNickname();
         this.gender = user.getGender();
-        this.profileImgId = user.getProfileImg().getId();
+        this.profileImgId = user.getFile().getId();
 
         if (open) {
             this.email = user.getEmail();
