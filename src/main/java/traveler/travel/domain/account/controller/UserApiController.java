@@ -33,13 +33,13 @@ public class UserApiController {
 
     //유저 회원가입
     @PostMapping()
-    public ResponseEntity save (UserDto user, MultipartFile file) throws IOException {
+    public ResponseEntity save (UserDto user) throws IOException {
         Optional<User> alreadyUser = userRepository.findByEmail(user.getEmail());
         if(alreadyUser.isPresent()){
             throw new EmailDuplicateException("emailDuplicated", ErrorCode.EMAIL_DUPLICATION);
         }
 
-        userService.join(user, file);
+        userService.join(user);
         //api 형식? 노션페이지
 
         return ResponseEntity.ok("success");
