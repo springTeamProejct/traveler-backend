@@ -100,8 +100,11 @@ public class UserService {
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
         // 6. 저장소 정보 업데이트
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
+//        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
+//        refreshTokenRepository.save(newRefreshToken);
+
+        // refresh token 은 그대로 두고 access token 만 재발급
+        tokenDto.updateRefreshToken(null);
 
         // 토큰 발급
         return tokenDto;
