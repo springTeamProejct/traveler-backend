@@ -14,6 +14,7 @@ public class PostSearchCondition {
     private KeywordType keywordType;
     private String keyword;
     private Category category;
+    private Long writerId;
 
     private Boolean gatherYn;
     private Gender gender;

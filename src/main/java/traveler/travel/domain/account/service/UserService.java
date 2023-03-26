@@ -8,11 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import traveler.travel.domain.account.entity.RefreshToken;
 import traveler.travel.domain.account.repository.RefreshTokenRepository;
-import traveler.travel.domain.file.service.FileService;
-import traveler.travel.domain.post.entity.File;
 import traveler.travel.global.dto.*;
 import traveler.travel.domain.account.entity.User;
 import traveler.travel.domain.account.repository.UserRepository;
@@ -21,7 +18,6 @@ import traveler.travel.global.exception.NotFoundException;
 import traveler.travel.global.util.RedisUtil;
 import traveler.travel.jwt.TokenProvider;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,8 +100,11 @@ public class UserService {
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
         // 6. 저장소 정보 업데이트
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
+//        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
+//        refreshTokenRepository.save(newRefreshToken);
+
+        // refresh token 은 그대로 두고 access token 만 재발급
+        tokenDto.updateRefreshToken(null);
 
         // 토큰 발급
         return tokenDto;
@@ -156,11 +155,9 @@ public class UserService {
     }
 
     //단일 회원 정보 확인 기능
-    @Transactional
     public User getUser(Long userId){
         return userRepository.findById(userId).filter(u -> !u.isDeleted())
                 .orElseThrow(() -> new NotFoundException("F03"));
-
     }
 
     //user 탈퇴

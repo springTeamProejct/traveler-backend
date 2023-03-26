@@ -2,6 +2,7 @@ package traveler.travel.domain.account.entity;
 
 import lombok.*;
 import traveler.travel.domain.common.entity.BaseTimeEntity;
+import traveler.travel.domain.post.entity.Post;
 import traveler.travel.global.dto.UserDto;
 import traveler.travel.domain.account.enums.AccountType;
 import traveler.travel.domain.account.enums.Authority;
@@ -10,6 +11,8 @@ import traveler.travel.domain.post.entity.File;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
